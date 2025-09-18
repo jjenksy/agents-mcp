@@ -1,0 +1,14 @@
+spring.application.name: jenksy-mcp
+spring:
+  main:
+    web-application-type: none
+    banner-mode: off
+  ai:
+    mcp:
+      server:
+        name: jenksy-mcp
+        version: 1.0.0
+
+logging:
+  pattern:
+    console:

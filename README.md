@@ -334,11 +334,29 @@ get_agent_info("ai-engineer")
 ./gradlew test
 ```
 
-### Rebuilding After Changes
+### Creating a Release
+
+The project uses automated GitHub Actions for releases:
+
+```bash
+# Create and push a version tag to trigger release
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+This will:
+- Build the JAR automatically
+- Create a GitHub release with downloadable assets
+- Generate checksums for security verification
+- Update release notes automatically
+
+**Note**: The release workflow only runs on version tags (like `v1.0.0`), not regular pushes to main.
+
+### Manual Build
 
 ```bash
 ./gradlew clean build
-# Restart Claude Desktop to use updated JAR
+# JAR created at: build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 ```
 
 ## 📁 Project Structure

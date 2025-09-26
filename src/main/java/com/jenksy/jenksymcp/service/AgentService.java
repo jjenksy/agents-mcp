@@ -39,7 +39,14 @@ import java.util.stream.Stream;
 @Slf4j
 public class AgentService {
 
+    private static final String MCP_OPTIMIZED = "mcp-optimized";
+    private static final String ERROR_STATUS = "error";
+    private static final String SUCCESS_STATUS = "success";
+    private static final String MD_EXTENSION = ".md";
+    private static final String README_MD = "README.md";
+
     private final List<Agent> agents = new ArrayList<>();
+
     private final Cache<String, String> agentContexts = Caffeine.newBuilder()
             .maximumSize(1000)
             .expireAfterAccess(5, TimeUnit.MINUTES)
@@ -48,30 +55,46 @@ public class AgentService {
 
     @PostConstruct
     public void loadAgents() {
-        log.info("Loading agents from classpath and filesystem");
+        long startTime = System.currentTimeMillis();
+        log.info("Loading agents...");
 
-        // First try loading from classpath (for JAR deployments)
-        boolean loadedFromClasspath = loadAgentsFromClasspath();
+        try {
+            // First try loading from classpath (for JAR deployments)
+            boolean loadedFromClasspath = loadAgentsFromClasspath();
 
-        if (!loadedFromClasspath) {
-            // If not found in classpath, try filesystem (for development)
-            Path agentsDir = Paths.get("agents");
-            if (!Files.exists(agentsDir)) {
-                log.warn("Agents not found in classpath or filesystem, loading default agents");
-                loadDefaultAgents();
-                return;
+            if (!loadedFromClasspath) {
+                // If not found in classpath, try filesystem (for development)
+                Path agentsDir = Paths.get("agents");
+                if (!Files.exists(agentsDir)) {
+                    log.warn("Agents not found in classpath or filesystem, loading default agents");
+                    loadDefaultAgents();
+                    return;
+                }
+
+                // Load agents from filesystem
+                try (Stream<Path> paths = Files.walk(agentsDir)) {
+                    var agentPaths = paths.filter(Files::isRegularFile)
+                            .filter(path -> path.toString().endsWith(MD_EXTENSION))
+                            .filter(path -> !path.getFileName().toString().equals(README_MD))
+                            .toList();
+
+                    agentPaths.forEach(this::loadAgentFromPath);
+                    log.info("Loaded {} agents from filesystem: {}", agents.size(), agentsDir);
+                } catch (IOException e) {
+                    log.error("Error loading agents from directory", e);
+                    loadDefaultAgents();
+                }
             }
 
-            try (Stream<Path> paths = Files.walk(agentsDir)) {
-                paths.filter(Files::isRegularFile)
-                        .filter(path -> path.toString().endsWith(".md"))
-                        .filter(path -> !path.getFileName().toString().equals("README.md"))
-                        .forEach(this::loadAgentFromPath);
-                log.info("Loaded {} agents from filesystem: {}", agents.size(), agentsDir);
-            } catch (IOException e) {
-                log.error("Error loading agents from directory", e);
-                loadDefaultAgents();
-            }
+            long loadTime = System.currentTimeMillis() - startTime;
+            log.info("Agent loading completed in {}ms - {} agents ready", loadTime, agents.size());
+
+            // Schedule periodic cleanup
+            scheduler.scheduleAtFixedRate(this::cleanupExpiredContexts, 5, 5, TimeUnit.MINUTES);
+
+        } catch (Exception e) {
+            log.error("Critical error during agent loading", e);
+            loadDefaultAgents();
         }
     }
 
@@ -87,8 +110,8 @@ public class AgentService {
 
             for (Resource resource : resources) {
                 String filename = resource.getFilename();
-                if (filename != null && !filename.equals("README.md")) {
-                    loadAgentFromResource(resource, filename.replace(".md", ""));
+                if (filename != null && !filename.equals(README_MD)) {
+                    loadAgentFromResource(resource, filename.replace(MD_EXTENSION, ""));
                 }
             }
 
@@ -134,7 +157,7 @@ public class AgentService {
     private void loadAgentFromPath(Path agentPath) {
         try {
             String content = Files.readString(agentPath);
-            Agent agent = parseAgentMarkdown(content, agentPath.getFileName().toString().replace(".md", ""));
+            Agent agent = parseAgentMarkdown(content, agentPath.getFileName().toString().replace(MD_EXTENSION, ""));
             if (agent != null) {
                 agents.add(agent);
                 log.debug("Loaded agent from filesystem: {}", agent.name());
@@ -160,7 +183,7 @@ public class AgentService {
         // Parse YAML frontmatter fields
         String name = extractYamlValue(frontmatter, "name", filename);
         String description = extractYamlValue(frontmatter, "description", "");
-        String model = extractYamlValue(frontmatter, "model", "mcp-optimized");
+        String model = extractYamlValue(frontmatter, "model", MCP_OPTIMIZED);
         String toolsStr = extractYamlValue(frontmatter, "tools", "");
 
         List<String> tools = toolsStr.isEmpty() ? List.of() : Arrays.asList(toolsStr.split(",\\s*"));
@@ -179,23 +202,23 @@ public class AgentService {
         agents.addAll(List.of(
                 new Agent("ai-engineer",
                         "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
-                        "mcp-optimized", List.of(),
+                        MCP_OPTIMIZED, List.of(),
                         "You are an AI engineer specializing in production-grade LLM applications and intelligent agent architectures."),
                 new Agent("backend-architect",
                         "Design RESTful APIs, microservice boundaries, and database schemas",
-                        "mcp-optimized", List.of(),
+                        MCP_OPTIMIZED, List.of(),
                         "You are a backend system architect specializing in scalable API design and microservices."),
                 new Agent("frontend-developer",
                         "Build React components, implement responsive layouts, and handle client-side state management",
-                        "mcp-optimized", List.of(),
+                        MCP_OPTIMIZED, List.of(),
                         "You are a frontend developer specializing in React, modern JavaScript, and responsive design."),
                 new Agent("code-reviewer",
                         "Elite code review expert specializing in security, performance, and production reliability",
-                        "mcp-optimized", List.of(),
+                        MCP_OPTIMIZED, List.of(),
                         "You are a code review expert focusing on security, performance optimization, and production reliability."),
                 new Agent("debugger",
                         "Debugging specialist for errors, test failures, and unexpected behavior",
-                        "mcp-optimized", List.of(),
+                        MCP_OPTIMIZED, List.of(),
                         "You are a debugging specialist expert at resolving errors, test failures, and unexpected behavior.")));
     }
 
@@ -237,7 +260,7 @@ public class AgentService {
                     "unknown",
                     "unknown",
                     "Error: Agent name cannot be blank",
-                    "error",
+                    ERROR_STATUS,
                     invocation.context());
         }
 
@@ -246,11 +269,12 @@ public class AgentService {
                     invocation.agentName(),
                     "unknown",
                     "Error: Task description cannot be blank",
-                    "error",
+                    ERROR_STATUS,
                     invocation.context());
         }
 
         log.info("Invoking agent: {} with task: {}", invocation.agentName(), invocation.task());
+
 
         Agent agent = agents.stream()
                 .filter(a -> a.name().equals(invocation.agentName()))
@@ -262,7 +286,7 @@ public class AgentService {
                     invocation.agentName(),
                     "unknown",
                     "Error: Agent '" + invocation.agentName() + "' not found. Use get_agents to see available agents.",
-                    "error",
+                    ERROR_STATUS,
                     invocation.context());
         }
 
@@ -270,14 +294,14 @@ public class AgentService {
         String contextKey = invocation.agentName() + "_" + System.currentTimeMillis();
         agentContexts.put(contextKey, invocation.context());
 
-        // Return structured agent guidance for the client tool to use
+        // Return structured agent guidance
         String response = buildAgentGuidance(agent, invocation);
 
         return new AgentResponse(
                 agent.name(),
-                "mcp-optimized", // Generic identifier instead of specific model
+                MCP_OPTIMIZED,
                 response,
-                "success",
+                SUCCESS_STATUS,
                 contextKey);
     }
 
@@ -353,10 +377,10 @@ public class AgentService {
     }
 
     private String buildAgentGuidance(Agent agent, AgentInvocation invocation) {
-        // Return concise, actionable guidance optimized for MCP consumers like VS Code Copilot
+        // Return concise, actionable guidance for MCP consumers
         StringBuilder guidance = new StringBuilder();
 
-        // Optimized for VS Code Copilot consumption
+        // Format for MCP client consumption
         guidance.append("## ").append(agent.name().toUpperCase()).append(" SPECIALIST\n");
         guidance.append("> ").append(agent.description()).append("\n\n");
 

@@ -13,19 +13,13 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AgentService Tests")
@@ -91,6 +85,7 @@ class AgentServiceTest {
 
             // Then
             assertThat(result).isNotNull();
+            assertThat(result).isNotNull(); // Ensure non-null for IDE
             assertThat(result.name()).isEqualTo("test-agent");
             assertThat(result.description()).isEqualTo("Test agent description");
             assertThat(result.model()).isEqualTo("mcp-optimized");
@@ -116,6 +111,7 @@ class AgentServiceTest {
 
             // Then
             assertThat(result).isNotNull();
+            assertThat(result).isNotNull(); // Ensure non-null for IDE
             assertThat(result.name()).isEqualTo("minimal-agent");
             assertThat(result.description()).isEqualTo("Minimal description");
             assertThat(result.model()).isEqualTo("mcp-optimized");

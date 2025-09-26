@@ -21,8 +21,3 @@ management:
     health:
       show-details: always
 
-jenksy:
-  mcp:
-    agents:
-      hot-reload: false
-      test-mode: true

@@ -1,33 +1,45 @@
-# AI Agents MCP Server
+# Jenksy MCP Server
 
-**Bring Claude Code's powerful agent system to any MCP-compatible tool.** Access 20 specialized AI agents through VS Code Copilot, Claude Desktop, and other Model Context Protocol applications.
+**A lightweight Model Context Protocol server for local development workflows.** Provides 20 specialized AI agents optimized for VS Code Copilot integration with a simple monitoring dashboard.
 
-[![Release](https://img.shields.io/github/v/release/jjenksy/agents-mcp)](https://github.com/jjenksy/agents-mcp/releases)
 [![Java](https://img.shields.io/badge/Java-21+-orange)](https://adoptium.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green)](https://spring.io/projects/spring-boot)
+[![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.2-blue)](https://spring.io/projects/spring-ai)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 ## Quick Start
 
-**Install with one command:**
+**Prerequisites:**
+- Java 21+
+- Gradle (included via wrapper)
 
+**1. Clone and Build:**
 ```bash
-curl -sSL https://github.com/jjenksy/agents-mcp/raw/main/scripts/install.sh | bash
+git clone <repository-url>
+cd jenksy-mcp
+./gradlew clean build
 ```
 
-**Use with VS Code:**
-
+**2. Start the Server:**
 ```bash
-code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+./gradlew bootRun
 ```
 
-**Test it works:**
+**3. Configure VS Code Copilot:**
+```bash
+# Add to VS Code settings.json or use CLI
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","$(pwd)/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
+```
 
+**4. Test Integration:**
 ```
 Please list all available AI agents
 ```
 
-> **How it works**: VS Code Copilot automatically translates your natural language request into MCP tool calls behind the scenes
+**5. Access Development Dashboard:**
+```
+http://localhost:8080/dashboard
+```
 
 ## What You Get
 
@@ -45,101 +57,125 @@ Instead of manually crafting prompts, invoke specialized agents with domain expe
 
 ## Key Features
 
-- **20 Specialized Agents** - Domain experts for every development need
-- **VS Code Copilot Optimized** - 75% smaller responses, smarter tool guidance
-- **MCP Protocol** - Works with VS Code Copilot, Claude Desktop, and more
-- **Production Ready** - Caching, monitoring, automated deployment
-- **Easy Installation** - One-line install script with VS Code integration
-- **Extensible** - Add custom agents with simple markdown files
+- **20 Specialized Agents** - Domain experts covering architecture, languages, AI/ML, security, and more
+- **Local Development Dashboard** - Basic monitoring, agent testing, and system metrics
+- **VS Code Copilot Optimized** - Responses designed for seamless integration
+- **Simple Setup** - Standard Spring Boot application with minimal configuration
+- **Agent Caching** - Caffeine-based caching for improved response times
+- **Health Monitoring** - Spring Boot actuator endpoints for system status
 
-## Installation Options
+## Local Development Setup
 
-### Option 1: Install Script (Recommended)
+### Development Workflow
 
+**Daily Development Cycle:**
 ```bash
-# Download and run installer
-curl -sSL https://github.com/jjenksy/agents-mcp/raw/main/scripts/install.sh | bash
+# 1. Start server
+./gradlew bootRun
+
+# 2. Monitor via dashboard
+open http://localhost:8080/dashboard
+
+# 3. Make changes to agents or code
+# 4. Quick rebuild (development)
+./gradlew build -x test
+
+# 5. Restart server
+./gradlew bootRun
 ```
 
-The script will:
+### Basic Monitoring
 
-- Download the latest JAR from GitHub releases
-- Install to `~/.jenksy-mcp/jenksy-mcp.jar`
-- Optionally configure VS Code automatically
-
-### Option 2: Manual Installation
-
-**Download the latest release:**
-
+**Health Check:**
 ```bash
-# Download latest JAR from GitHub releases
-curl -L https://github.com/jjenksy/agents-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
-
-# Configure VS Code
-code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+curl http://localhost:8080/actuator/health
 ```
 
-### Option 3: Build from Source
-
-**For development or custom builds:**
-
+**System Metrics:**
 ```bash
-# Clone and build
-git clone https://github.com/jjenksy/agents-mcp.git
-cd agents-mcp
-./gradlew clean build
+curl http://localhost:8080/actuator/metrics
+```
 
-# Copy JAR to standard location
-mkdir -p ~/.jenksy-mcp
-cp build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar ~/.jenksy-mcp/jenksy-mcp.jar
+### Configuration
 
-# Configure VS Code
-code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp/jenksy-mcp.jar"]}'
+**Custom Configuration:**
+Create `application-local.yml`:
+```yaml
+spring:
+  profiles:
+    active: local
+
+logging:
+  level:
+    com.jenksy.jenksymcp: DEBUG     # Detailed logging
 ```
 
 ## VS Code Integration
 
-VS Code Copilot requires global MCP server configuration. Use one of these methods:
+**Local Development Integration:**
 
-### VS Code CLI (Recommended)
+### VS Code Configuration
 
+**Option 1: Use Project Path**
 ```bash
-code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+cd /path/to/jenksy-mcp
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","$(pwd)/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
 ```
 
-### Manual Global Configuration
-
-1. Open VS Code Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux)
-2. Run: `Preferences: Open User Settings (JSON)`
-3. Add the MCP server configuration:
-
+**Option 2: Manual Configuration**
+Add to VS Code `settings.json`:
 ```json
 {
   "github.copilot.chat.mcpServers": {
     "jenksy-agents": {
       "command": "java",
-      "args": ["-jar", "/path/to/jenksy-mcp.jar"]
+      "args": [
+        "-jar",
+        "/absolute/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+      ]
     }
   }
 }
 ```
 
-**Note:** Replace `/path/to/jenksy-mcp.jar` with your actual JAR path. After adding, restart VS Code.
+### Verification
 
-## Claude Desktop Integration
+**Check MCP Connection:**
+```bash
+# Ensure server is running
+curl http://localhost:8080/actuator/health
 
+# Test in VS Code Copilot
+"Show me all available AI agents"
+```
+
+### Local Development Tips
+
+1. **Keep Server Running**: Avoid frequent restarts by keeping the MCP server running
+2. **Monitor Dashboard**: Use the dashboard to check system status and test agents
+3. **Check Logs**: Monitor application logs for agent loading and MCP tool calls
+4. **Health Checks**: Use actuator endpoints to verify system health
+
+## Claude Desktop Integration (Optional)
+
+**For Local Development Testing:**
 Add to your `claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "jenksy-agents": {
+    "jenksy-agents-local": {
       "command": "java",
-      "args": ["-jar", "/path/to/jenksy-mcp.jar"]
+      "args": [
+        "-jar",
+        "/absolute/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+      ]
     }
   }
 }
 ```
+
+**Note**: This is primarily for testing MCP functionality. VS Code Copilot is the main target for this local development tool.
 
 ## Available Agents
 
@@ -275,101 +311,156 @@ These don't provide enough context for the agents to give useful guidance.
 3. "Can you focus on indexing strategies for the email and username columns?"
 ```
 
-## Development
+## Local Development Guide
 
-### Requirements
+### System Requirements
 
-- Java 21+
-- Spring Boot 3.5.5
-- Gradle (wrapper included)
+- **Java 21+**
+- **Spring Boot 3.5.5**
+- **Gradle** (wrapper included)
 
-### Running in Development
+### Development Commands
 
+**Standard Gradle Commands:**
 ```bash
+./gradlew bootRun                       # Start the server
+./gradlew test                          # Run all tests
+./gradlew build -x test                 # Fast build without tests
+./gradlew clean build                   # Full clean build
+```
+
+**Monitoring:**
+```bash
+# Check health status
+curl http://localhost:8080/actuator/health
+
+# Monitor system metrics
+curl http://localhost:8080/actuator/metrics
+
+# Access dashboard
+open http://localhost:8080/dashboard
+```
+
+### Configuration
+
+**Optional JVM Settings:**
+```bash
+export JAVA_OPTS="-Xms128m -Xmx512m"
 ./gradlew bootRun
 ```
 
-### Running Tests
+### Agent Development
 
-```bash
-./gradlew test
+**Adding New Agents:**
+1. Create new `.md` file in `src/main/resources/agents/`
+2. Follow the YAML frontmatter format:
+```yaml
+---
+name: my-new-agent
+description: Agent description
+---
+# System prompt content here
 ```
-
-### Creating a Release
-
-The project uses automated GitHub Actions for releases:
-
-```bash
-# Create and push a version tag to trigger release
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-This will:
-
-- Build the JAR automatically
-- Create a GitHub release with downloadable assets
-- Generate checksums for security verification
-- Update release notes automatically
-
-**Note**: The release workflow only runs on version tags (like `v1.0.0`), not regular pushes to main.
-
-### Manual Build
-
-```bash
-./gradlew clean build
-# JAR created at: build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
-```
+3. Rebuild and restart server
+4. Test via dashboard or MCP tools
 
 ## Documentation
 
 - **[Contributing Guide](CONTRIBUTING.md)** - How to contribute agents and code
-- **[Agent Creation Guide](docs/creating-agents.md)** - Create custom agents
-- **[Deployment Guide](docs/deployment.md)** - Production deployment
-- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
-- **[API Reference](docs/api-reference.md)** - Complete MCP tools documentation
+- **[Local Development Guide](LOCAL-DEVELOPMENT.md)** - Detailed local development setup and optimization
+- **[Agent Creation Guide](docs/creating-agents.md)** - Create and customize agents
+- **[VS Code Setup Guide](VSCODE_SETUP.md)** - Complete VS Code Copilot integration
+- **[MCP Troubleshooting](MCP_TROUBLESHOOTING.md)** - Common MCP integration issues
+- **[Manual Agent Usage](MANUAL_AGENT_USAGE.md)** - Direct agent usage examples
 
-## Troubleshooting
+## Local Development Troubleshooting
 
-### Agent Not Found
+### Startup Issues
 
-**Ask naturally in VS Code Copilot:**
-```
-"Show me all available agents"
-"What agents are available for [your-domain]?"
-"List agents related to backend development"
-```
+1. **Check Java version:**
+   ```bash
+   java -version  # Ensure Java 21+
+   ```
 
-### VS Code Not Connecting
-
-1. Ensure GitHub Copilot Chat extension is installed
-2. Verify JAR path in configuration is correct
-3. Restart VS Code after configuration changes
-4. Check that Java 21+ is installed
+2. **Verify build:**
+   ```bash
+   ./gradlew clean build
+   ```
 
 ### Performance Issues
 
-The server includes built-in caching and monitoring. Check application logs for performance metrics.
+1. **Monitor system health:**
+   ```bash
+   curl http://localhost:8080/actuator/health
+   ```
+
+2. **Check dashboard:**
+   ```
+   http://localhost:8080/dashboard
+   ```
+
+### VS Code MCP Integration Issues
+
+1. **Verify server is running:**
+   ```bash
+   curl http://localhost:8080/actuator/health
+   ```
+
+2. **Check VS Code configuration:**
+   - Ensure GitHub Copilot Chat extension is installed
+   - Verify JAR path is correct and absolute
+   - Restart VS Code after configuration changes
+
+3. **Test MCP connection:**
+   ```
+   # In VS Code Copilot
+   "Please list all available AI agents"
+   ```
+
+### Agent Loading Problems
+
+1. **Check agent files:**
+   ```bash
+   ls -la src/main/resources/agents/
+   ```
+
+2. **Verify agent format:**
+   ```bash
+   head -10 src/main/resources/agents/ai-engineer.md
+   ```
+
+3. **Monitor agent loading:**
+   ```bash
+   # Look for agent loading logs
+   grep "Loaded.*agents" logs/application.log
+   ```
 
 ## Contributing
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+We welcome contributions! Focus areas include:
 
-- Adding new agents
-- Improving existing agents
-- Contributing code
-- Reporting issues
+- **Adding Specialized Agents**: Create domain-specific agents for development workflows
+- **Dashboard Enhancements**: Improve monitoring and developer experience
+- **VS Code Integration**: Improve MCP integration and developer ergonomics
+- **Documentation**: Keep documentation accurate and helpful
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+## Architecture Overview
+
+This MCP server provides a clean local development experience with:
+
+- **Spring Boot 3.5.5** with standard configuration
+- **Java 21** support
+- **Caffeine Caching** for agent response optimization
+- **Simple Dashboard** with basic monitoring and agent testing
+- **Parallel Agent Loading** for faster startup
+- **Standard Spring Boot** actuator endpoints for health monitoring
 
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Support
-
-- **Issues**: [GitHub Issues](https://github.com/jjenksy/agents-mcp/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jjenksy/agents-mcp/discussions)
-- **Documentation**: [docs/](docs/)
-
 ---
 
-**Transform your development workflow with specialized AI agents!**
+**Enhance your local development workflow with specialized AI agent integration!**

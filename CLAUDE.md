@@ -8,7 +8,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Model Context Protocol (MCP) server built with Spring Boot that provides AI agent functionality for integration with tools like VS Code Copilot and Claude Desktop. The server exposes a comprehensive collection of specialized AI agents that can be invoked for domain-specific tasks, similar to Claude Code's built-in agent system.
+This is a Model Context Protocol (MCP) server built with Spring Boot that provides AI agent functionality for integration with tools like VS Code Copilot and Claude Desktop. The server exposes 20 specialized AI agents that can be invoked for domain-specific tasks.
+
+**Architecture Features:**
+
+- Spring Boot setup with standard configuration
+- 20 specialized AI agents loaded from embedded markdown files
+- Basic Caffeine caching for agent responses
+- Spring Boot actuator endpoints for health checks
 
 ## Development Commands
 
@@ -26,6 +33,7 @@ This creates two JAR files in `build/libs/`:
 ./gradlew bootRun
 ```
 
+
 ### Testing
 ```bash
 ./gradlew test
@@ -41,7 +49,8 @@ java -jar build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 ### Core Components
 
 - **JenksyMcpApplication** (`src/main/java/com/jenksy/jenksymcp/JenksyMcpApplication.java`): Main Spring Boot application that configures MCP tool callbacks
-- **AgentService** (`src/main/java/com/jenksy/jenksymcp/service/AgentService.java`): Service class containing MCP agent tools using `@Tool` annotations
+- **AgentService** (`src/main/java/com/jenksy/jenksymcp/service/AgentService.java`): Service class containing MCP agent tools using `@Tool` annotations with basic caching
+- **CacheConfig** (`src/main/java/com/jenksy/jenksymcp/config/CacheConfig.java`): Basic Caffeine cache configuration
 - **Agent** (`src/main/java/com/jenksy/jenksymcp/record/Agent.java`): Record representing an AI agent with name, description, model, tools, and system prompt
 - **AgentInvocation** (`src/main/java/com/jenksy/jenksymcp/record/AgentInvocation.java`): Record for agent invocation requests
 - **AgentResponse** (`src/main/java/com/jenksy/jenksymcp/record/AgentResponse.java`): Record for agent responses
@@ -61,10 +70,11 @@ The application registers these tools via `ToolCallbacks.from(agentService)` in 
 
 AgentService uses `@PostConstruct` to load AI agents from markdown files:
 1. **Primary Source**: Loads agents from `src/main/resources/agents/` directory (embedded in JAR)
-2. **Fallback**: If directory not found, loads 5 default agents: ai-engineer, backend-architect, frontend-developer, code-reviewer, debugger
-3. **Agent Format**: Each agent is defined in a markdown file with YAML frontmatter containing name, description, model, and optional tools
-4. **System Prompts**: The markdown content after frontmatter serves as the agent's specialized system prompt
-5. **Current Agents**: 20 specialized agents covering development domains: architecture, programming languages, AI/ML, security, DevOps, and tools
+2. **Standard Loading**: Loads agents sequentially during application startup
+3. **Fallback**: If directory not found, loads 5 default agents: ai-engineer, backend-architect, frontend-developer, code-reviewer, debugger
+4. **Agent Format**: Each agent is defined in a markdown file with YAML frontmatter containing name, description, and optional tools
+5. **System Prompts**: The markdown content after frontmatter serves as the agent's specialized system prompt
+6. **Current Agents**: 20 specialized agents covering development domains: architecture, programming languages, AI/ML, security, DevOps, and tools
 
 ## Dependencies
 
@@ -72,6 +82,7 @@ AgentService uses `@PostConstruct` to load AI agents from markdown files:
 - Spring AI 1.0.2 for MCP server support (`spring-ai-starter-mcp-server`)
 - Caffeine for agent caching
 - Spring Boot Actuator for health checks and metrics
+- Spring Boot Validation for input validation
 - Lombok for code generation and logging (`@Slf4j`)
 - JUnit 5 for testing
 - Spring Boot DevTools for development
@@ -102,13 +113,14 @@ tools: optional,tool,list
 # Agent system prompt content in markdown
 ```
 
-**Note**: Model specifications are no longer required as VS Code Copilot handles model selection automatically.
+**Note**: Model specifications are no longer required as MCP clients handle model selection automatically.
 
-### VS Code Copilot Optimization
 
-This MCP server is specifically optimized for VS Code Copilot integration:
+### MCP Client Optimization
+
+This MCP server is optimized for MCP client integration:
 - All agents return `"mcp-optimized"` as the model identifier
-- VS Code Copilot automatically uses its configured model for processing
+- MCP clients automatically use their configured model for processing
 - No model-specific dependencies or references in agent definitions
 - Simplified agent YAML frontmatter without model specifications
 
@@ -142,17 +154,17 @@ Once configured, you'll have access to these tools:
 - **get_agents**: List all 20 specialized AI agents
 - **find_agents**: Search agents by domain (e.g., "backend", "security", "AI")
 - **get_agent_info**: Get detailed agent capabilities and descriptions
-- **invoke_agent**: PRIMARY TOOL - Get specialized agent context and guidance for tasks with 75% smaller responses optimized for VS Code Copilot
+- **invoke_agent**: PRIMARY TOOL - Get specialized agent context and guidance for tasks
 - **get_recommended_agents**: Get 1-3 best agent recommendations for specific tasks
 
-### VS Code Copilot Integration Notes
+### MCP Client Integration Notes
 
-**Important**: VS Code Copilot uses natural language interaction, not direct tool calls. Users interact by saying:
+**Important**: MCP clients like VS Code Copilot use natural language interaction, not direct tool calls. Users interact by saying:
 - "Please use the ai-engineer agent to help design a RAG system..."
 - "Which agents can help with database optimization?"
 - "Show me all available agents"
 
-VS Code Copilot automatically translates these natural language requests into the appropriate MCP tool calls behind the scenes.
+MCP clients automatically translate these natural language requests into the appropriate MCP tool calls behind the scenes.
 
 ### Usage Examples for Direct Tool Integration (Claude Desktop)
 
@@ -186,3 +198,12 @@ When adding new agents to `src/main/resources/agents/`:
 4. Test agent loading by running the application and checking logs for "Loaded X agents from classpath"
 
 **Note**: After building or rebuilding, restart your AI tool to use the updated JAR. Agent files are embedded in the JAR during build.
+
+## Monitoring
+
+### Health Monitoring
+
+**Health Check:**
+```bash
+curl http://localhost:8080/actuator/health
+```

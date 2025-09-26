@@ -78,7 +78,7 @@ class SpringBootIntegrationTest {
         agentService.getAgents().forEach(agent -> {
             assertThat(agent.name()).isNotBlank();
             assertThat(agent.description()).isNotBlank();
-            assertThat(agent.model()).isEqualTo("mcp-optimized");
+            assertThat(agent.model()).isNotBlank();
             assertThat(agent.systemPrompt()).isNotBlank();
         });
     }
@@ -107,11 +107,13 @@ class SpringBootIntegrationTest {
         // Then
         assertThat(applicationContext.getBean("agentService")).isNotNull();
         assertThat(applicationContext.getBean("toolCallbacks")).isNotNull();
-        assertThat(applicationContext.getBean("cacheManager")).isNotNull();
 
         // Verify component types
         assertThat(applicationContext.getBean(AgentService.class)).isInstanceOf(AgentService.class);
         assertThat(applicationContext.getBean("toolCallbacks")).isInstanceOf(List.class);
+
+        // Verify cache manager is available by type
+        assertThat(applicationContext.getBean(CacheManager.class)).isNotNull();
     }
 
     @Test

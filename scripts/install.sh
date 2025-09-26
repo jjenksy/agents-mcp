@@ -40,7 +40,7 @@ if command -v code &> /dev/null; then
     echo -e "${GREEN} VS Code CLI detected${NC}"
     VSCODE_AVAILABLE=true
 else
-    echo -e "${YELLOW}ℹ  VS Code CLI not found (optional)${NC}"
+    echo -e "${YELLOW}INFO: VS Code CLI not found (optional)${NC}"
     VSCODE_AVAILABLE=false
 fi
 

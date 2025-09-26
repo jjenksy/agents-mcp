@@ -107,10 +107,10 @@ java -jar build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 
 ## Current Status
 
-✅ **MCP Server**: Working (tested with Claude Desktop)
-✅ **Agent Loading**: 10 agents loaded from `agents/` directory
-✅ **Spring Boot**: Server starts successfully
-❓ **VS Code Integration**: Not connecting to MCP server
+**MCP Server**: Working (tested with Claude Desktop)
+**Agent Loading**: 10 agents loaded from `agents/` directory
+**Spring Boot**: Server starts successfully
+**VS Code Integration**: Not connecting to MCP server
 
 ## Next Steps
 

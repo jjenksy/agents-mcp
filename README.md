@@ -2,19 +2,19 @@
 
 A Model Context Protocol (MCP) server that provides access to 10+ specialized AI agents for integration with VS Code Copilot, Claude Desktop, and other MCP-compatible tools.
 
-## 🎯 Overview
+## Overview
 
 This MCP server brings Claude Code's powerful agent system to any MCP-compatible tool. Instead of manually crafting prompts, you can invoke specialized agents like `ai-engineer`, `backend-architect`, `security-auditor`, and many others with domain-specific expertise.
 
 ### Key Features
 
-- 🤖 **10+ Specialized Agents**: From `ai-engineer` to `database-optimizer`
-- 🔍 **Agent Discovery**: Find agents by capability or domain
-- 📋 **Task Execution**: Invoke agents with specific tasks and context
-- 🎯 **Smart Recommendations**: Get suggested agents for your specific needs
-- 🔧 **MCP Protocol**: Compatible with Claude Desktop, VS Code extensions, and more
+- **10+ Specialized Agents**: From `ai-engineer` to `database-optimizer`
+- **Agent Discovery**: Find agents by capability or domain
+- **Task Execution**: Invoke agents with specific tasks and context
+- **Smart Recommendations**: Get suggested agents for your specific needs
+- **MCP Protocol**: Compatible with Claude Desktop, VS Code extensions, and more
 
-## 🚀 Quick Installation
+## Quick Installation
 
 ### Option 1: Install Script (Recommended)
 
@@ -38,7 +38,7 @@ curl -L https://github.com/jenksy/jenksy-mcp/releases/latest/download/jenksy-mcp
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
 ```
 
-## 📦 Manual Installation
+## Manual Installation
 
 ### 1. Build the Project
 
@@ -113,7 +113,7 @@ After installation, the agent tools will be available in your chosen tool. Test 
 Use get_agents() to see available AI agents
 ```
 
-## 🤖 Included Agents
+## Included Agents
 
 The project includes 10 specialized agents in the `agents/` directory:
 
@@ -128,7 +128,7 @@ The project includes 10 specialized agents in the `agents/` directory:
 - `database-optimizer` - Database performance tuning
 - `debugger` - Error analysis and troubleshooting
 
-## 🔧 VS Code Integration
+## VS Code Integration
 
 VS Code Copilot requires global MCP server configuration (workspace-level `.vscode/mcp.json` is not supported).
 
@@ -212,7 +212,7 @@ Get agent recommendations for a specific task or domain.
 get_recommended_agents("optimize database performance")
 ```
 
-## 🤖 Agent Categories
+## Agent Categories
 
 ### Architecture & System Design
 - `backend-architect` - RESTful APIs, microservices, database design
@@ -253,7 +253,7 @@ get_recommended_agents("optimize database performance")
 - `legal-advisor` - Privacy policies and legal compliance
 - `customer-support` - Support automation and ticket handling
 
-## 💡 Usage Examples
+## Usage Examples
 
 ### Example 1: Get Agent Context for VS Code Copilot
 
@@ -320,7 +320,7 @@ get_agent_info("ai-engineer")
 // Returns full agent capabilities and description
 ```
 
-## 🔧 Development
+## Development
 
 ### Running in Development
 
@@ -359,7 +359,7 @@ This will:
 # JAR created at: build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/main/java/com/jenksy/jenksymcp/
@@ -372,7 +372,7 @@ src/main/java/com/jenksy/jenksymcp/
     └── AgentResponse.java         # Agent response
 ```
 
-## 🌟 Agent Highlights
+## Agent Highlights
 
 ### Most Versatile
 - **ai-engineer**: Production LLM apps, RAG systems, agent orchestration
@@ -389,7 +389,7 @@ src/main/java/com/jenksy/jenksymcp/
 - **security-auditor**: Vulnerability assessment and compliance
 - **performance-engineer**: System optimization and profiling
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### Agent Not Found
 ```bash
@@ -410,22 +410,22 @@ find_agents("your-domain")
 - Restart Claude Desktop after configuration changes
 - Check that the `temp-agents` directory exists with agent files
 
-## 📄 License
+## License
 
 This project extends the Jenksy educational platform and integrates with the open-source agents collection from https://github.com/wshobson/agents.
 
-## 🤝 Contributing
+## Contributing
 
 To add custom agents:
 1. Create markdown files in `temp-agents/` directory
 2. Follow the agent format with YAML frontmatter
 3. Rebuild the project
 
-## 📞 Support
+## Support
 
 For issues with:
 - **MCP Server**: Check logs and configuration
 - **Agent Responses**: Verify agent exists with `get_agent_info()`
 - **Integration**: Ensure MCP protocol compatibility
 
-Transform your development workflow with specialized AI agents! 🚀
+Transform your development workflow with specialized AI agents!

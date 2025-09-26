@@ -1,6 +1,6 @@
 # VS Code MCP Server Setup Guide
 
-## 🎯 Quick Setup
+## Quick Setup
 
 ### 1. Prerequisites
 - VS Code installed
@@ -34,7 +34,7 @@ The `.vscode/mcp.json` file is pre-configured:
 }
 ```
 
-## 🚀 Using AI Agents in VS Code
+## Using AI Agents in VS Code
 
 ### Open Copilot Chat
 - Press `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Shift+I` (Mac)
@@ -81,7 +81,7 @@ Now review this authentication code using security expertise
 Now analyze these SQL queries for performance issues
 ```
 
-## 🛠️ Development Commands
+## Development Commands
 
 ### Build and Run (Using VS Code Tasks)
 - **Build**: `Ctrl+Shift+P` → `Tasks: Run Task` → `build`
@@ -93,7 +93,7 @@ Launch configurations are pre-configured:
 - **Launch MCP Server**: Debug the Spring Boot application
 - **Launch MCP Server (JAR)**: Debug the built JAR file
 
-## 🔧 Available VS Code Files
+## Available VS Code Files
 
 - `.vscode/mcp.json` - MCP server configuration
 - `.vscode/settings.json` - Workspace settings
@@ -101,7 +101,7 @@ Launch configurations are pre-configured:
 - `.vscode/launch.json` - Debug configurations
 - `.vscode/extensions.json` - Recommended extensions
 
-## 🤖 Available AI Agents
+## Available AI Agents
 
 1. **ai-engineer** - LLM applications, RAG systems
 2. **backend-architect** - API design, microservices
@@ -114,7 +114,7 @@ Launch configurations are pre-configured:
 9. **database-optimizer** - Database performance
 10. **debugger** - Error analysis, troubleshooting
 
-## 🔍 Troubleshooting
+## Troubleshooting
 
 ### MCP Server Not Loading
 1. Check that GitHub Copilot Chat extension is installed and enabled
@@ -132,6 +132,6 @@ Launch configurations are pre-configured:
 2. Run `./gradlew clean build` in terminal
 3. Check build output for errors
 
-## 🎉 Success!
+## Success!
 
 When properly configured, you'll have access to 10+ specialized AI agents directly in VS Code Copilot Chat, giving you Claude Code-style agent functionality in your development environment!

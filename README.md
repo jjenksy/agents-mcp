@@ -60,6 +60,7 @@ curl -sSL https://github.com/jenksy/agents-mcp/raw/main/scripts/install.sh | bas
 ```
 
 The script will:
+
 - Download the latest JAR from GitHub releases
 - Install to `~/.jenksy-mcp/jenksy-mcp.jar`
 - Optionally configure VS Code automatically
@@ -92,43 +93,6 @@ cp build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar ~/.jenksy-mcp/jenksy-mcp.jar
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp/jenksy-mcp.jar"]}'
 ```
 
-## Usage Examples
-
-### Optimized Single-Call Workflow ⭐
-
-```javascript
-// Get specialized guidance in one efficient call
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a user management API",
-  "context": "Spring Boot app with JWT auth, expecting 100k users"
-})
-```
-
-### Smart Agent Discovery
-
-```javascript
-// Get targeted recommendations (1-3 agents)
-@workspace Use get_recommended_agents("optimize database performance")
-
-// Search by domain when you need broader options
-@workspace Use find_agents("security")
-```
-
-### Migration from Legacy Usage
-
-```javascript
-// ✅ NEW: Get everything in one optimized call
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Implement vector search",
-  "context": "Existing Spring Boot REST API"
-})
-
-// ❌ OLD: Multiple calls (less efficient)
-// Use invoke_agent instead for better results
-```
-
 ## VS Code Integration
 
 VS Code Copilot requires global MCP server configuration. Use one of these methods:
@@ -150,10 +114,7 @@ code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenk
   "github.copilot.chat.mcpServers": {
     "jenksy-agents": {
       "command": "java",
-      "args": [
-        "-jar",
-        "/path/to/jenksy-mcp.jar"
-      ]
+      "args": ["-jar", "/path/to/jenksy-mcp.jar"]
     }
   }
 }
@@ -170,10 +131,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "jenksy-agents": {
       "command": "java",
-      "args": [
-        "-jar",
-        "/path/to/jenksy-mcp.jar"
-      ]
+      "args": ["-jar", "/path/to/jenksy-mcp.jar"]
     }
   }
 }
@@ -182,6 +140,7 @@ Add to your `claude_desktop_config.json`:
 ## Available Agents
 
 ### Architecture & Design
+
 - **architect-review** - Modern architecture patterns, clean architecture, microservices, DDD
 - **backend-architect** - RESTful APIs, microservices, database schemas
 - **cloud-architect** - AWS/Azure/GCP multi-cloud infrastructure, IaC, FinOps optimization
@@ -190,18 +149,22 @@ Add to your `claude_desktop_config.json`:
 - **ui-ux-designer** - Design systems, user research, accessibility standards
 
 ### DevOps & Infrastructure
+
 - **deployment-engineer** - CI/CD pipelines, GitOps workflows, progressive delivery
 - **database-optimizer** - Query optimization, indexing strategies, performance tuning
 
 ### AI & Machine Learning
+
 - **ml-engineer** - PyTorch, TensorFlow, model serving, MLOps infrastructure
 - **prompt-engineer** - Advanced prompting techniques, LLM optimization
 
 ### Quality & Security
+
 - **code-reviewer** - AI-powered code analysis, security vulnerabilities, performance optimization
 - **security-auditor** - OWASP compliance, threat modeling, security testing
 
 ### Programming Languages
+
 - **java-pro** - Modern Java with Spring Boot, enterprise patterns
 - **javascript-pro** - Modern JavaScript, ES6+, async patterns, Node.js APIs
 - **python-pro** - Modern Python with async patterns and optimization
@@ -209,6 +172,7 @@ Add to your `claude_desktop_config.json`:
 - **sql-pro** - Modern SQL, cloud-native databases, OLTP/OLAP optimization
 
 ### Development Tools
+
 - **frontend-developer** - React components, responsive layouts, state management
 - **mermaid-expert** - Diagrams for flowcharts, sequences, ERDs, and architectures
 - **debugger** - Error analysis, test failures, unexpected behavior
@@ -220,15 +184,18 @@ Add to your `claude_desktop_config.json`:
 ### Primary Tools (Optimized Workflow)
 
 #### `invoke_agent(invocation)` ⭐ **Recommended**
+
 Get concise, task-specific guidance from specialized agents. **75% smaller responses** optimized for VS Code Copilot consumption.
 
 **Optimized Response Format:**
+
 - Structured markdown for better readability
 - Focused recommendations (3-4 actionable steps)
 - Expert context included inline
 - Automatic context caching
 
 **Example:**
+
 ```javascript
 @workspace Use invoke_agent({
   "agentName": "backend-architect",
@@ -238,9 +205,11 @@ Get concise, task-specific guidance from specialized agents. **75% smaller respo
 ```
 
 #### `get_recommended_agents(task)`
+
 Get 1-3 best agents for your task with usage guidance. More efficient than browsing all agents.
 
 **Example:**
+
 ```javascript
 @workspace Use get_recommended_agents("optimize database performance")
 ```
@@ -248,29 +217,34 @@ Get 1-3 best agents for your task with usage guidance. More efficient than brows
 ### Discovery Tools
 
 #### `get_agents()`
+
 List all available agents. Use `find_agents` to search by domain, or `invoke_agent` for task-specific guidance.
 
 #### `find_agents(query)`
+
 Search agents by domain keywords. Use `invoke_agent` after finding the right agent for task-specific guidance.
 
 **Examples:**
+
 ```javascript
 @workspace Use find_agents("backend")      // Find backend-related agents
 @workspace Use find_agents("security")     // Find security specialists
 ```
 
 #### `get_agent_info(agentName)`
+
 Get agent capabilities and description. Use `invoke_agent` for actionable task guidance instead of just information.
 
 **Example:**
+
 ```javascript
 @workspace Use get_agent_info("ai-engineer")
 ```
 
-
 ### Optimized Usage Patterns
 
 **Best Practice - Single Tool Call:**
+
 ```javascript
 // ✅ Optimized: Get everything you need in one call
 @workspace Use invoke_agent({
@@ -281,6 +255,7 @@ Get agent capabilities and description. Use `invoke_agent` for actionable task g
 ```
 
 **Avoid - Multiple Tool Calls:**
+
 ```javascript
 // ❌ Inefficient: Multiple calls for the same information
 @workspace Use get_agent_info("ai-engineer")
@@ -318,6 +293,7 @@ git push origin v1.0.0
 ```
 
 This will:
+
 - Build the JAR automatically
 - Create a GitHub release with downloadable assets
 - Generate checksums for security verification
@@ -343,6 +319,7 @@ This will:
 ## Troubleshooting
 
 ### Agent Not Found
+
 ```bash
 # List all available agents
 get_agents()
@@ -352,12 +329,14 @@ find_agents("your-domain")
 ```
 
 ### VS Code Not Connecting
+
 1. Ensure GitHub Copilot Chat extension is installed
 2. Verify JAR path in configuration is correct
 3. Restart VS Code after configuration changes
 4. Check that Java 21+ is installed
 
 ### Performance Issues
+
 The server includes built-in caching and monitoring. Check application logs for performance metrics.
 
 ## Contributing

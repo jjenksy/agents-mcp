@@ -2,7 +2,7 @@
 
 **Bring Claude Code's powerful agent system to any MCP-compatible tool.** Access 20 specialized AI agents through VS Code Copilot, Claude Desktop, and other Model Context Protocol applications.
 
-[![Release](https://img.shields.io/github/v/release/jenksy/agents-mcp)](https://github.com/jenksy/agents-mcp/releases)
+[![Release](https://img.shields.io/github/v/release/jenksy/agents-mcp)](https://github.com/jjenksy/agents-mcp/releases)
 [![Java](https://img.shields.io/badge/Java-21+-orange)](https://adoptium.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green)](https://spring.io/projects/spring-boot)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)

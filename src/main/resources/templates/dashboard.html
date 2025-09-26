@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${title}">Jenksy MCP Agent Dashboard</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin: -20px -20px 2rem -20px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 300;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .card-title {
+            font-size: 0.9rem;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .card-value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-description {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid #f1f5f9;
+        }
+
+        .agent-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .agent-table th,
+        .agent-table td {
+            padding: 12px 16px;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .agent-table th {
+            background-color: #f8fafc;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .agent-table tr:hover {
+            background-color: #f8fafc;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .agent-description {
+            color: #64748b;
+            font-size: 0.9rem;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .usage-count {
+            font-weight: 600;
+            color: #059669;
+        }
+
+        .success-rate {
+            font-weight: 600;
+        }
+
+        .success-rate.high { color: #059669; }
+        .success-rate.medium { color: #d97706; }
+        .success-rate.low { color: #dc2626; }
+        .success-rate.none { color: #64748b; }
+
+        .top-agents {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .top-agent {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .top-agent-info {
+            flex: 1;
+        }
+
+        .top-agent-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.25rem;
+        }
+
+        .top-agent-desc {
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .top-agent-count {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .refresh-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #059669;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .refresh-indicator.show {
+            opacity: 1;
+        }
+
+        .last-updated {
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            color: #64748b;
+        }
+
+        .error {
+            color: #dc2626;
+            background: #fee2e2;
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border: 1px solid #fecaca;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header {
+                margin: -10px -10px 1rem -10px;
+                padding: 1.5rem 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .summary-cards {
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                gap: 1rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+
+            .card-value {
+                font-size: 2rem;
+            }
+
+            .agent-table {
+                font-size: 0.9rem;
+            }
+
+            .agent-table th,
+            .agent-table td {
+                padding: 8px 12px;
+            }
+
+            .agent-description {
+                max-width: 200px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .agent-table th:nth-child(3),
+            .agent-table td:nth-child(3) {
+                display: none;
+            }
+
+            .agent-description {
+                max-width: 150px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Jenksy MCP Dashboard</h1>
+            <p>AI Agent Usage Statistics and Monitoring</p>
+        </div>
+
+        <div class="refresh-indicator" id="refreshIndicator">
+            Refreshing data...
+        </div>
+
+        <div id="dashboard-content">
+            <div class="loading">
+                Loading dashboard data...
+            </div>
+        </div>
+
+        <div class="last-updated" id="lastUpdated">
+            Last updated: <span id="updateTime">Loading...</span>
+        </div>
+    </div>
+
+    <script>
+        let dashboardData = null;
+        let refreshInterval = null;
+
+        function formatDate(date) {
+            if (!date) return 'Never';
+            return new Date(date).toLocaleString();
+        }
+
+        function formatSuccessRate(rate) {
+            if (rate === 0) return 'N/A';
+            return rate.toFixed(1) + '%';
+        }
+
+        function getSuccessRateClass(rate) {
+            if (rate === 0) return 'none';
+            if (rate >= 90) return 'high';
+            if (rate >= 70) return 'medium';
+            return 'low';
+        }
+
+        function renderDashboard(data) {
+            const container = document.getElementById('dashboard-content');
+
+            const summaryHtml = `
+                <div class="summary-cards">
+                    <div class="card">
+                        <div class="card-title">Total Invocations</div>
+                        <div class="card-value">${data.totalInvocations}</div>
+                        <div class="card-description">Across all agents</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Active Agents</div>
+                        <div class="card-value">${data.activeAgents}</div>
+                        <div class="card-description">Of ${data.agents.length} total agents</div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">Overall Success Rate</div>
+                        <div class="card-value">${formatSuccessRate(data.overallSuccessRate)}</div>
+                        <div class="card-description">Average across active agents</div>
+                    </div>
+                </div>
+            `;
+
+            const topAgents = data.usageStats
+                .filter(stats => stats.invocationCount > 0)
+                .slice(0, 5);
+
+            const topAgentsHtml = `
+                <div class="section">
+                    <h2 class="section-title">Top 5 Most Used Agents</h2>
+                    <div class="top-agents">
+                        ${topAgents.length > 0 ? topAgents.map(agent => `
+                            <div class="top-agent">
+                                <div class="top-agent-info">
+                                    <div class="top-agent-name">${agent.agentName}</div>
+                                    <div class="top-agent-desc">${agent.description}</div>
+                                </div>
+                                <div class="top-agent-count">${agent.invocationCount}</div>
+                            </div>
+                        `).join('') : '<div class="loading">No usage data available yet</div>'}
+                    </div>
+                </div>
+            `;
+
+            const agentTableHtml = `
+                <div class="section">
+                    <h2 class="section-title">All Agents (${data.agents.length})</h2>
+                    <div style="overflow-x: auto;">
+                        <table class="agent-table">
+                            <thead>
+                                <tr>
+                                    <th>Agent Name</th>
+                                    <th>Description</th>
+                                    <th>Usage Count</th>
+                                    <th>Success Rate</th>
+                                    <th>Last Used</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${data.usageStats.map(stats => `
+                                    <tr>
+                                        <td class="agent-name">${stats.agentName}</td>
+                                        <td class="agent-description" title="${stats.description}">${stats.description}</td>
+                                        <td class="usage-count">${stats.invocationCount}</td>
+                                        <td class="success-rate ${getSuccessRateClass(stats.successRate)}">${formatSuccessRate(stats.successRate)}</td>
+                                        <td>${formatDate(stats.lastUsed)}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+
+            container.innerHTML = summaryHtml + topAgentsHtml + agentTableHtml;
+        }
+
+        function showRefreshIndicator() {
+            const indicator = document.getElementById('refreshIndicator');
+            indicator.classList.add('show');
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 1000);
+        }
+
+        function updateLastUpdatedTime() {
+            document.getElementById('updateTime').textContent = new Date().toLocaleString();
+        }
+
+        async function fetchDashboardData() {
+            try {
+                showRefreshIndicator();
+                const response = await fetch('/api/dashboard/data');
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                dashboardData = await response.json();
+                renderDashboard(dashboardData);
+                updateLastUpdatedTime();
+
+                // Clear any previous error messages
+                const existingError = document.querySelector('.error');
+                if (existingError) {
+                    existingError.remove();
+                }
+
+            } catch (error) {
+                console.error('Error fetching dashboard data:', error);
+
+                const container = document.getElementById('dashboard-content');
+                container.innerHTML = `
+                    <div class="error">
+                        <strong>Error loading dashboard data:</strong> ${error.message}
+                        <br>Retrying in 30 seconds...
+                    </div>
+                `;
+            }
+        }
+
+        function startAutoRefresh() {
+            // Clear any existing interval
+            if (refreshInterval) {
+                clearInterval(refreshInterval);
+            }
+
+            // Set up 30-second refresh
+            refreshInterval = setInterval(fetchDashboardData, 30000);
+        }
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchDashboardData();
+            startAutoRefresh();
+        });
+
+        // Handle page visibility changes to pause/resume refresh
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                if (refreshInterval) {
+                    clearInterval(refreshInterval);
+                    refreshInterval = null;
+                }
+            } else {
+                startAutoRefresh();
+                fetchDashboardData(); // Refresh immediately when page becomes visible
+            }
+        });
+
+        // Manual refresh on click
+        document.addEventListener('click', function(e) {
+            if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                fetchDashboardData();
+            }
+        });
+    </script>
+</body>
+</html>

@@ -33,14 +33,14 @@ class McpToolIntegrationTest {
     void shouldRegisterAllMcpToolsSuccessfully() {
         // Then
         assertThat(toolCallbacks).isNotEmpty();
-        assertThat(toolCallbacks).hasSize(5); // AgentService provides 5 tool callbacks (one per @Tool method)
+        assertThat(toolCallbacks).hasSize(6); // AgentService provides 6 tool callbacks (one per @Tool method)
 
         // Verify all expected tool names are present
         List<String> toolNames = toolCallbacks.stream()
             .map(callback -> callback.getToolDefinition().name())
             .toList();
         assertThat(toolNames).containsExactlyInAnyOrder(
-            "get_agents", "find_agents", "get_agent_info", "invoke_agent", "get_recommended_agents"
+            "get_agents", "find_agents", "get_agent_info", "invoke_agent", "get_recommended_agents", "get_agent_statistics"
         );
     }
 
@@ -78,6 +78,12 @@ class McpToolIntegrationTest {
         List<Agent> recommendations = agentService.getRecommendedAgents("build REST API");
         assertThat(recommendations).isNotEmpty();
         assertThat(recommendations.size()).isLessThanOrEqualTo(3);
+
+        // Test get_agent_statistics
+        com.jenksy.jenksymcp.record.DashboardData dashboardData = agentService.getAgentStatistics();
+        assertThat(dashboardData).isNotNull();
+        assertThat(dashboardData.agents()).isNotEmpty();
+        assertThat(dashboardData.usageStats()).isNotNull();
     }
 
     @Test

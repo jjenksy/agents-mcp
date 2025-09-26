@@ -3,6 +3,8 @@ package com.jenksy.jenksymcp.service;
 import com.jenksy.jenksymcp.record.Agent;
 import com.jenksy.jenksymcp.record.AgentInvocation;
 import com.jenksy.jenksymcp.record.AgentResponse;
+import com.jenksy.jenksymcp.record.AgentUsageStats;
+import com.jenksy.jenksymcp.record.DashboardData;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
@@ -39,6 +41,8 @@ import java.util.stream.Stream;
 @Slf4j
 public class AgentService {
 
+    private final AgentStatsService agentStatsService;
+
     private static final String MCP_OPTIMIZED = "mcp-optimized";
     private static final String ERROR_STATUS = "error";
     private static final String SUCCESS_STATUS = "success";
@@ -52,6 +56,10 @@ public class AgentService {
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build();
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    public AgentService(AgentStatsService agentStatsService) {
+        this.agentStatsService = agentStatsService;
+    }
 
     @PostConstruct
     public void loadAgents() {
@@ -275,17 +283,24 @@ public class AgentService {
 
         log.info("Invoking agent: {} with task: {}", invocation.agentName(), invocation.task());
 
+        // Track invocation timing
+        String agentName = invocation.agentName();
+        long startTime = System.currentTimeMillis();
 
         Agent agent = agents.stream()
-                .filter(a -> a.name().equals(invocation.agentName()))
+                .filter(a -> a.name().equals(agentName))
                 .findFirst()
                 .orElse(null);
 
         if (agent == null) {
+            // Record failed invocation
+            long responseTime = System.currentTimeMillis() - startTime;
+            agentStatsService.recordInvocation(agentName, false, responseTime);
+
             return new AgentResponse(
-                    invocation.agentName(),
+                    agentName,
                     "unknown",
-                    "Error: Agent '" + invocation.agentName() + "' not found. Use get_agents to see available agents.",
+                    "Error: Agent '" + agentName + "' not found. Use get_agents to see available agents.",
                     ERROR_STATUS,
                     invocation.context());
         }
@@ -296,6 +311,10 @@ public class AgentService {
 
         // Return structured agent guidance
         String response = buildAgentGuidance(agent, invocation);
+
+        // Record successful invocation with response time
+        long responseTime = System.currentTimeMillis() - startTime;
+        agentStatsService.recordInvocation(agentName, true, responseTime);
 
         return new AgentResponse(
                 agent.name(),
@@ -369,6 +388,16 @@ public class AgentService {
 
         // Limit to 3 for focused recommendations
         return recommended.stream().limit(3).toList();
+    }
+
+    @Tool(description = "Get agent usage statistics and performance metrics. Shows invocation counts, success rates, and response times for monitoring and optimization.", name = "get_agent_statistics")
+    public DashboardData getAgentStatistics() {
+        log.info("Getting agent usage statistics");
+        return agentStatsService.generateDashboardData(agents);
+    }
+
+    public List<AgentUsageStats> getUsageStatistics() {
+        return agentStatsService.generateDashboardData(agents).usageStats();
     }
 
     public void cleanupExpiredContexts() {

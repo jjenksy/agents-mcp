@@ -8,6 +8,14 @@ spring:
   cache:
     type: caffeine
 
+jenksy:
+  mcp:
+    stats:
+      persistence:
+        enabled: true
+        interval-minutes: 5
+        file-path: agent-stats.json
+
 management:
   endpoints:
     web:

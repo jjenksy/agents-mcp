@@ -12,6 +12,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
@@ -25,11 +26,14 @@ import static org.junit.jupiter.api.Assertions.*;
 @DisplayName("AgentService Tests")
 class AgentServiceTest {
 
+    @Mock
+    private AgentStatsService agentStatsService;
+
     private AgentService agentService;
 
     @BeforeEach
     void setUp() {
-        agentService = new AgentService();
+        agentService = new AgentService(agentStatsService);
     }
 
     @Nested

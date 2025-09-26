@@ -134,7 +134,7 @@ Returns an array of 1-3 `Agent` objects:
   {
     "name": "backend-architect",
     "description": "Design RESTful APIs, microservice boundaries, and database schemas",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a backend system architect..."
   }
@@ -184,7 +184,7 @@ Returns an array of all `Agent` objects:
   {
     "name": "ai-engineer",
     "description": "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are an AI engineer specializing in..."
   },

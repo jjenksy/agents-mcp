@@ -160,7 +160,7 @@ public class AgentService {
         // Parse YAML frontmatter fields
         String name = extractYamlValue(frontmatter, "name", filename);
         String description = extractYamlValue(frontmatter, "description", "");
-        String model = extractYamlValue(frontmatter, "model", "sonnet");
+        String model = extractYamlValue(frontmatter, "model", "mcp-optimized");
         String toolsStr = extractYamlValue(frontmatter, "tools", "");
 
         List<String> tools = toolsStr.isEmpty() ? List.of() : Arrays.asList(toolsStr.split(",\\s*"));
@@ -179,23 +179,23 @@ public class AgentService {
         agents.addAll(List.of(
                 new Agent("ai-engineer",
                         "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
-                        "opus", List.of(),
+                        "mcp-optimized", List.of(),
                         "You are an AI engineer specializing in production-grade LLM applications and intelligent agent architectures."),
                 new Agent("backend-architect",
                         "Design RESTful APIs, microservice boundaries, and database schemas",
-                        "opus", List.of(),
+                        "mcp-optimized", List.of(),
                         "You are a backend system architect specializing in scalable API design and microservices."),
                 new Agent("frontend-developer",
                         "Build React components, implement responsive layouts, and handle client-side state management",
-                        "sonnet", List.of(),
+                        "mcp-optimized", List.of(),
                         "You are a frontend developer specializing in React, modern JavaScript, and responsive design."),
                 new Agent("code-reviewer",
                         "Elite code review expert specializing in security, performance, and production reliability",
-                        "opus", List.of(),
+                        "mcp-optimized", List.of(),
                         "You are a code review expert focusing on security, performance optimization, and production reliability."),
                 new Agent("debugger",
                         "Debugging specialist for errors, test failures, and unexpected behavior",
-                        "sonnet", List.of(),
+                        "mcp-optimized", List.of(),
                         "You are a debugging specialist expert at resolving errors, test failures, and unexpected behavior.")));
     }
 

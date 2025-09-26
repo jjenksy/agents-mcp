@@ -56,7 +56,6 @@ Create agents using this YAML frontmatter + markdown format:
 ---
 name: your-agent-name
 description: Brief description of the agent's expertise and capabilities
-model: sonnet
 tools: tool1, tool2
 ---
 
@@ -434,7 +433,7 @@ class AgentServiceTest {
     void shouldReturnAgentInfo_whenAgentExists() {
         // Arrange
         String agentName = "test-agent";
-        Agent expectedAgent = new Agent(agentName, "Test agent", "sonnet", List.of(), "Test prompt");
+        Agent expectedAgent = new Agent(agentName, "Test agent", "mcp-optimized", List.of(), "Test prompt");
         when(cacheManager.getCache("agents")).thenReturn(agentCache);
         when(agentCache.get(eq(agentName), any())).thenReturn(expectedAgent);
 

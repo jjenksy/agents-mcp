@@ -97,11 +97,20 @@ Agents use markdown files with YAML frontmatter:
 ---
 name: agent-name
 description: Agent description
-model: opus|sonnet
 tools: optional,tool,list
 ---
 # Agent system prompt content in markdown
 ```
+
+**Note**: Model specifications are no longer required as VS Code Copilot handles model selection automatically.
+
+### VS Code Copilot Optimization
+
+This MCP server is specifically optimized for VS Code Copilot integration:
+- All agents return `"mcp-optimized"` as the model identifier
+- VS Code Copilot automatically uses its configured model for processing
+- No model-specific dependencies or references in agent definitions
+- Simplified agent YAML frontmatter without model specifications
 
 ## Integration with AI Tools
 

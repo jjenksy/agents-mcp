@@ -104,14 +104,14 @@ Array of `Agent` objects containing all available agents.
   {
     "name": "ai-engineer",
     "description": "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are an AI engineer specializing in production-grade LLM applications..."
   },
   {
     "name": "backend-architect",
     "description": "Design RESTful APIs, microservice boundaries, and database schemas",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a backend system architect..."
   }
@@ -178,14 +178,14 @@ find_agents("performance optimization")
   {
     "name": "backend-architect",
     "description": "Design RESTful APIs, microservice boundaries, and database schemas",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a backend system architect..."
   },
   {
     "name": "java-pro",
     "description": "Java expert specializing in Spring Framework, microservices, and enterprise patterns",
-    "model": "sonnet",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a Java programming expert..."
   }
@@ -232,7 +232,7 @@ get_agent_info("non-existent-agent") // Returns null
 {
   "name": "ai-engineer",
   "description": "Build production-ready LLM applications, advanced RAG systems, and intelligent agents. Implements vector search, multimodal AI, agent orchestration, and enterprise AI integrations.",
-  "model": "opus",
+  "model": "mcp-optimized",
   "tools": [],
   "systemPrompt": "You are an AI engineer specializing in production-grade LLM applications, generative AI systems, and intelligent agent architectures.\n\n## Purpose\nExpert AI engineer specializing in LLM application development..."
 }
@@ -398,14 +398,14 @@ get_recommended_agents("Optimize application performance")
   {
     "name": "backend-architect",
     "description": "Design RESTful APIs, microservice boundaries, and database schemas",
-    "model": "opus",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a backend system architect..."
   },
   {
     "name": "java-pro",
     "description": "Java expert specializing in Spring Framework, microservices, and enterprise patterns",
-    "model": "sonnet",
+    "model": "mcp-optimized",
     "tools": [],
     "systemPrompt": "You are a Java programming expert..."
   }
@@ -439,7 +439,7 @@ Represents a specialized AI agent with domain expertise.
 interface Agent {
   name: string;           // Unique identifier (kebab-case)
   description: string;    // Brief capability summary
-  model: string;         // Preferred AI model (opus/sonnet/haiku)
+  model: string;         // Model identifier (always "mcp-optimized" for VS Code)
   tools: string[];       // Available tools (currently unused)
   systemPrompt: string;  // Detailed expertise and instructions
 }
@@ -451,7 +451,7 @@ interface Agent {
 |-------|------|-------------|---------|
 | `name` | string | Unique agent identifier | `"ai-engineer"` |
 | `description` | string | 1-2 sentence capability summary | `"Build production-ready LLM applications..."` |
-| `model` | string | Preferred model for complex tasks | `"opus"`, `"sonnet"`, `"haiku"` |
+| `model` | string | Model identifier for VS Code compatibility | `"mcp-optimized"` |
 | `tools` | string[] | Reserved for future tool integrations | `[]` |
 | `systemPrompt` | string | Comprehensive instructions (1000-8000 chars) | Full system prompt content |
 

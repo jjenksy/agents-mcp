@@ -263,7 +263,6 @@ java.lang.RuntimeException: Invalid YAML frontmatter
    ---
    name: agent-name
    description: "Agent description"
-   model: sonnet
    ---
    ```
 

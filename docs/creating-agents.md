@@ -31,7 +31,6 @@ Every agent file follows this structure:
 ---
 name: agent-name
 description: Brief description of the agent's capabilities
-model: preferred-model
 tools: optional,tool,list
 ---
 
@@ -39,6 +38,8 @@ tools: optional,tool,list
 The system prompt defines the agent's personality, expertise, and behavior.
 It should be comprehensive and specific to the agent's domain.
 ```
+
+**Note**: Model specifications have been removed as VS Code Copilot handles model selection automatically.
 
 ### File Naming Convention
 
@@ -62,7 +63,6 @@ touch src/main/resources/agents/data-scientist.md
 ---
 name: data-scientist
 description: Expert in data analysis, machine learning, and statistical modeling
-model: opus
 tools:
 ---
 ```
@@ -280,7 +280,6 @@ invoke_agent({
 ---
 name: security-auditor
 description: Elite security expert specializing in vulnerability assessment, penetration testing, and security architecture review
-model: opus
 ---
 
 You are a security auditor specializing in comprehensive security assessments and vulnerability analysis.
@@ -322,7 +321,6 @@ Elite cybersecurity professional with expertise in vulnerability assessment, pen
 ---
 name: performance-engineer
 description: Specialist in application performance optimization, load testing, and scalability engineering
-model: opus
 ---
 
 You are a performance engineer specializing in application optimization and scalability analysis.

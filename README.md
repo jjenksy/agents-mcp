@@ -1,26 +1,61 @@
 # AI Agents MCP Server
 
-A Model Context Protocol (MCP) server that provides access to 10+ specialized AI agents for integration with VS Code Copilot, Claude Desktop, and other MCP-compatible tools.
+**Bring Claude Code's powerful agent system to any MCP-compatible tool.** Access 20 specialized AI agents through VS Code Copilot, Claude Desktop, and other Model Context Protocol applications.
 
-## Overview
+[![Release](https://img.shields.io/github/v/release/jenksy/agents-mcp)](https://github.com/jenksy/agents-mcp/releases)
+[![Java](https://img.shields.io/badge/Java-21+-orange)](https://adoptium.net/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green)](https://spring.io/projects/spring-boot)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
-This MCP server brings Claude Code's powerful agent system to any MCP-compatible tool. Instead of manually crafting prompts, you can invoke specialized agents like `ai-engineer`, `backend-architect`, `security-auditor`, and many others with domain-specific expertise.
+## Quick Start
 
-### Key Features
+**Install with one command:**
 
-- **10+ Specialized Agents**: From `ai-engineer` to `database-optimizer`
-- **Agent Discovery**: Find agents by capability or domain
-- **Task Execution**: Invoke agents with specific tasks and context
-- **Smart Recommendations**: Get suggested agents for your specific needs
-- **MCP Protocol**: Compatible with Claude Desktop, VS Code extensions, and more
+```bash
+curl -sSL https://github.com/jenksy/agents-mcp/raw/main/scripts/install.sh | bash
+```
 
-## Quick Installation
+**Use with VS Code:**
+
+```bash
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+```
+
+**Test it works:**
+
+```
+@workspace Use get_agents()
+```
+
+## What You Get
+
+Instead of manually crafting prompts, invoke specialized agents with domain expertise:
+
+- **ai-engineer** - Production LLM apps, RAG systems, agent orchestration
+- **architect-review** - Modern architecture patterns, clean architecture, DDD
+- **cloud-architect** - AWS/Azure/GCP infrastructure, IaC, FinOps optimization
+- **code-reviewer** - AI-powered code analysis, security vulnerabilities
+- **deployment-engineer** - CI/CD pipelines, GitOps workflows, container security
+- **ml-engineer** - PyTorch, TensorFlow, model serving, MLOps
+- **prompt-engineer** - Advanced prompting techniques, LLM optimization
+- **ui-ux-designer** - Design systems, accessibility, user research
+- And 12+ more specialized agents covering JavaScript, SQL, Mermaid diagrams, requirements analysis, and more
+
+## Key Features
+
+- **20 Specialized Agents** - Domain experts for every development need
+- **MCP Protocol** - Works with VS Code Copilot, Claude Desktop, and more
+- **Production Ready** - Caching, monitoring, automated deployment
+- **Easy Installation** - One-line install script with VS Code integration
+- **Extensible** - Add custom agents with simple markdown files
+
+## Installation Options
 
 ### Option 1: Install Script (Recommended)
 
 ```bash
 # Download and run installer
-curl -sSL https://github.com/jenksy/jenksy-mcp/raw/main/scripts/install.sh | bash
+curl -sSL https://github.com/jenksy/agents-mcp/raw/main/scripts/install.sh | bash
 ```
 
 The script will:
@@ -30,38 +65,75 @@ The script will:
 
 ### Option 2: Manual Installation
 
+**Once a release is available:**
+
 ```bash
-# Download latest JAR
-curl -L https://github.com/jenksy/jenksy-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
+# Download latest JAR (after first release is created)
+curl -L https://github.com/jenksy/agents-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
 
 # Configure VS Code
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
 ```
 
-## Manual Installation
-
-### 1. Build the Project
+**For now, build from source:**
 
 ```bash
+# Clone and build
+git clone https://github.com/jenksy/agents-mcp.git
+cd agents-mcp
 ./gradlew clean build
+
+# Copy JAR to standard location
+mkdir -p ~/.jenksy-mcp
+cp build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar ~/.jenksy-mcp/jenksy-mcp.jar
+
+# Configure VS Code
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp/jenksy-mcp.jar"]}'
 ```
 
-This creates the JAR file at `build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar`.
+## Usage Examples
 
-### 2. Configure for VS Code
+### Get Agent Guidance
 
-VS Code requires global MCP server configuration. Use one of these methods:
+```javascript
+// Get specialized context for VS Code Copilot
+@workspace Use invoke_agent({
+  "agentName": "backend-architect",
+  "task": "Design a user management API",
+  "context": "Spring Boot app with JWT auth, expecting 100k users"
+})
+```
 
-#### Option A: VS Code CLI (Recommended)
+### Find the Right Agent
 
-Use the VS Code CLI command from step above:
+```javascript
+// Search by domain
+@workspace Use find_agents("security")
+
+// Get recommendations
+@workspace Use get_recommended_agents("optimize database performance")
+```
+
+### Direct System Prompts
+
+```javascript
+// Get raw system prompt for direct use
+@workspace Use get_agent_prompt("ai-engineer")
+
+// Then use with any AI tool: "You are an AI engineer specializing in..."
+```
+
+## VS Code Integration
+
+VS Code Copilot requires global MCP server configuration. Use one of these methods:
+
+### VS Code CLI (Recommended)
+
 ```bash
-code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
 ```
 
-#### Option B: Manual Global Configuration
-
-Add to your VS Code's global MCP configuration file:
+### Manual Global Configuration
 
 1. Open VS Code Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux)
 2. Run: `Preferences: Open User Settings (JSON)`
@@ -74,18 +146,18 @@ Add to your VS Code's global MCP configuration file:
       "command": "java",
       "args": [
         "-jar",
-        "/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+        "/path/to/jenksy-mcp.jar"
       ]
     }
   }
 }
 ```
 
-**Note:** Replace `/path/to/jenksy-mcp` with your actual project path. After adding, restart VS Code.
+**Note:** Replace `/path/to/jenksy-mcp.jar` with your actual JAR path. After adding, restart VS Code.
 
-### 3. Alternative: Configure Claude Desktop
+## Claude Desktop Integration
 
-For Claude Desktop, add to your `claude_desktop_config.json`:
+Add to your `claude_desktop_config.json`:
 
 ```json
 {
@@ -94,74 +166,48 @@ For Claude Desktop, add to your `claude_desktop_config.json`:
       "command": "java",
       "args": [
         "-jar",
-        "/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+        "/path/to/jenksy-mcp.jar"
       ]
     }
   }
 }
 ```
 
-### 4. Verify Installation
+## Available Agents
 
-After installation, the agent tools will be available in your chosen tool. Test with:
+### Architecture & Design
+- **architect-review** - Modern architecture patterns, clean architecture, microservices, DDD
+- **backend-architect** - RESTful APIs, microservices, database schemas
+- **cloud-architect** - AWS/Azure/GCP multi-cloud infrastructure, IaC, FinOps optimization
+- **ai-engineer** - LLM applications, RAG systems, agent orchestration
+- **requirements-analyst** - Transform business requirements into structured tickets with acceptance criteria, dependencies, and implementation details
+- **ui-ux-designer** - Design systems, user research, accessibility standards
 
-```
-# In VS Code Copilot Chat:
-@workspace Use get_agents() to see available AI agents
+### DevOps & Infrastructure
+- **deployment-engineer** - CI/CD pipelines, GitOps workflows, progressive delivery
+- **database-optimizer** - Query optimization, indexing strategies, performance tuning
 
-# In Claude Desktop:
-Use get_agents() to see available AI agents
-```
+### AI & Machine Learning
+- **ml-engineer** - PyTorch, TensorFlow, model serving, MLOps infrastructure
+- **prompt-engineer** - Advanced prompting techniques, LLM optimization
 
-## Included Agents
+### Quality & Security
+- **code-reviewer** - AI-powered code analysis, security vulnerabilities, performance optimization
+- **security-auditor** - OWASP compliance, threat modeling, security testing
 
-The project includes 10 specialized agents in the `agents/` directory:
+### Programming Languages
+- **java-pro** - Modern Java with Spring Boot, enterprise patterns
+- **javascript-pro** - Modern JavaScript, ES6+, async patterns, Node.js APIs
+- **python-pro** - Modern Python with async patterns and optimization
+- **typescript-pro** - Advanced TypeScript with strict type safety
+- **sql-pro** - Modern SQL, cloud-native databases, OLTP/OLAP optimization
 
-- `ai-engineer` - LLM applications and RAG systems
-- `backend-architect` - API design and microservices
-- `frontend-developer` - React and modern frontend
-- `code-reviewer` - Security and performance analysis
-- `security-auditor` - Comprehensive security assessment
-- `java-pro` - Modern Java and Spring Boot
-- `python-pro` - Modern Python development
-- `typescript-pro` - Advanced TypeScript patterns
-- `database-optimizer` - Database performance tuning
-- `debugger` - Error analysis and troubleshooting
+### Development Tools
+- **frontend-developer** - React components, responsive layouts, state management
+- **mermaid-expert** - Diagrams for flowcharts, sequences, ERDs, and architectures
+- **debugger** - Error analysis, test failures, unexpected behavior
 
-## VS Code Integration
-
-VS Code Copilot requires global MCP server configuration (workspace-level `.vscode/mcp.json` is not supported).
-
-**Using Agent Tools in VS Code:**
-
-1. **Open Copilot Chat** in VS Code
-2. **Use MCP tools directly** in your conversation:
-   ```
-   @workspace Use get_agents() to see available AI agents
-   ```
-
-3. **Get specialized expertise**:
-   ```
-   @workspace Use get_agent_prompt("security-auditor") and then review this authentication code
-   ```
-
-4. **Get task-specific guidance**:
-   ```
-   @workspace Use invoke_agent with backend-architect to design an API for user management
-   ```
-
-**Example VS Code Workflow:**
-```javascript
-// In Copilot Chat:
-// 1. "@workspace Use get_recommended_agents('optimize database')"
-// 2. "@workspace Use get_agent_prompt('database-optimizer')"
-// 3. "Now using that database optimization expertise, review my SQL queries"
-
-// Or get structured guidance:
-// "@workspace Use invoke_agent with ai-engineer to design a RAG system"
-```
-
-## 📚 Available MCP Tools
+## MCP Tools Reference
 
 ### `get_agents()`
 Returns all available agents with their capabilities and descriptions.
@@ -173,11 +219,10 @@ Search for agents by domain or capability.
 ```javascript
 find_agents("backend")      // Find backend-related agents
 find_agents("security")     // Find security specialists
-find_agents("AI")          // Find AI/ML agents
 ```
 
 ### `get_agent_info(agentName)`
-Get detailed information about a specific agent including capabilities and expertise areas.
+Get detailed information about a specific agent.
 
 **Example:**
 ```javascript
@@ -185,7 +230,7 @@ get_agent_info("ai-engineer")
 ```
 
 ### `get_agent_prompt(agentName)`
-Get the raw system prompt for an agent to use directly in conversations with your AI tool.
+Get the raw system prompt for an agent to use directly in conversations.
 
 **Example:**
 ```javascript
@@ -193,7 +238,7 @@ get_agent_prompt("backend-architect")
 ```
 
 ### `invoke_agent(invocation)`
-Get specialized agent context and guidance for a task. Returns structured guidance that your AI tool can use as context.
+Get specialized agent context and guidance for a task.
 
 **Example:**
 ```javascript
@@ -212,115 +257,13 @@ Get agent recommendations for a specific task or domain.
 get_recommended_agents("optimize database performance")
 ```
 
-## Agent Categories
-
-### Architecture & System Design
-- `backend-architect` - RESTful APIs, microservices, database design
-- `cloud-architect` - AWS/Azure/GCP infrastructure
-- `graphql-architect` - GraphQL schemas and federation
-- `architect-reviewer` - Architectural analysis and validation
-
-### Programming Languages
-- `java-pro` - Modern Java with Spring Boot
-- `python-pro` - Python with async patterns and optimization
-- `typescript-pro` - Advanced TypeScript and type safety
-- `rust-pro` - Systems programming with Rust
-- `golang-pro` - Go development and concurrency
-- And 13+ more language specialists...
-
-### Infrastructure & Operations
-- `devops-troubleshooter` - Production debugging and log analysis
-- `kubernetes-architect` - Container orchestration and GitOps
-- `database-optimizer` - Query optimization and performance
-- `incident-responder` - Critical incident management
-- `terraform-specialist` - Infrastructure as Code
-
-### Quality & Security
-- `code-reviewer` - Code quality and security analysis
-- `security-auditor` - Vulnerability assessment and OWASP compliance
-- `test-automator` - Comprehensive test suite creation
-- `performance-engineer` - Application profiling and optimization
-
-### AI & Data
-- `ai-engineer` - LLM applications, RAG systems, agent orchestration
-- `ml-engineer` - ML pipelines, model serving, feature engineering
-- `data-scientist` - Data analysis and statistical modeling
-- `mlops-engineer` - ML infrastructure and experiment tracking
-
-### Business & Content
-- `business-analyst` - Metrics analysis and KPI tracking
-- `content-marketer` - SEO-optimized content creation
-- `legal-advisor` - Privacy policies and legal compliance
-- `customer-support` - Support automation and ticket handling
-
-## Usage Examples
-
-### Example 1: Get Agent Context for VS Code Copilot
-
-```javascript
-// First, find the right agent
-get_recommended_agents("design REST API")
-
-// Get specialized context
-invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a social media API with posts, comments, and likes",
-  "context": "Spring Boot app, PostgreSQL database, expecting 100k users"
-})
-```
-
-**Returns structured guidance:**
-- Agent's specialized system prompt
-- Domain-specific approach patterns
-- Task-specific context
-- Expert-level guidance your AI tool can use
-
-### Example 2: Direct System Prompt Usage
-
-```javascript
-// Get the raw system prompt for direct use
-get_agent_prompt("security-auditor")
-
-// Use with your AI tool: "You are a security auditor specializing in..."
-```
-
-**Perfect for:**
-- VS Code Copilot conversations
-- Claude Desktop sessions
-- Any MCP-compatible AI tool
-
-### Example 3: Multi-Agent Workflow
-
-```javascript
-// Step 1: Get architecture guidance
-invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design user service architecture"
-})
-
-// Step 2: Get security review
-invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review the proposed architecture for vulnerabilities"
-})
-
-// Step 3: Get implementation guidance
-get_agent_prompt("java-pro")
-```
-
-### Example 4: Agent Discovery
-
-```javascript
-// Find agents by domain
-find_agents("machine learning")
-// Returns: ai-engineer, ml-engineer, mlops-engineer, data-scientist
-
-// Get details about specific agent
-get_agent_info("ai-engineer")
-// Returns full agent capabilities and description
-```
-
 ## Development
+
+### Requirements
+
+- Java 21+
+- Spring Boot 3.5.5
+- Gradle (wrapper included)
 
 ### Running in Development
 
@@ -359,35 +302,13 @@ This will:
 # JAR created at: build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 ```
 
-## Project Structure
+## Documentation
 
-```
-src/main/java/com/jenksy/jenksymcp/
-├── JenksyMcpApplication.java      # Main Spring Boot app
-├── service/
-│   └── AgentService.java          # MCP agent tools
-└── record/
-    ├── Agent.java                 # Agent data model
-    ├── AgentInvocation.java       # Invocation request
-    └── AgentResponse.java         # Agent response
-```
-
-## Agent Highlights
-
-### Most Versatile
-- **ai-engineer**: Production LLM apps, RAG systems, agent orchestration
-- **backend-architect**: API design, microservices, system architecture
-- **code-reviewer**: Security-focused code analysis and best practices
-
-### Most Specialized
-- **blockchain-developer**: Web3, smart contracts, DeFi protocols
-- **minecraft-bukkit-pro**: Minecraft server plugin development
-- **seo-snippet-hunter**: Content optimization for featured snippets
-
-### Mission Critical
-- **incident-responder**: Production outage management
-- **security-auditor**: Vulnerability assessment and compliance
-- **performance-engineer**: System optimization and profiling
+- **[Contributing Guide](CONTRIBUTING.md)** - How to contribute agents and code
+- **[Agent Creation Guide](docs/creating-agents.md)** - Create custom agents
+- **[Deployment Guide](docs/deployment.md)** - Production deployment
+- **[Troubleshooting](docs/troubleshooting.md)** - Common issues and solutions
+- **[API Reference](docs/api-reference.md)** - Complete MCP tools documentation
 
 ## Troubleshooting
 
@@ -400,32 +321,34 @@ get_agents()
 find_agents("your-domain")
 ```
 
-### Getting Better Results
-1. **Be specific**: Include tech stack, constraints, and requirements
-2. **Provide context**: Background information helps agents give better advice
-3. **Use the right agent**: Check agent descriptions to match your need
+### VS Code Not Connecting
+1. Ensure GitHub Copilot Chat extension is installed
+2. Verify JAR path in configuration is correct
+3. Restart VS Code after configuration changes
+4. Check that Java 21+ is installed
 
-### Integration Issues
-- Ensure JAR path in config is absolute and correct
-- Restart Claude Desktop after configuration changes
-- Check that the `temp-agents` directory exists with agent files
-
-## License
-
-This project extends the Jenksy educational platform and integrates with the open-source agents collection from https://github.com/wshobson/agents.
+### Performance Issues
+The server includes built-in caching and monitoring. Check application logs for performance metrics.
 
 ## Contributing
 
-To add custom agents:
-1. Create markdown files in `temp-agents/` directory
-2. Follow the agent format with YAML frontmatter
-3. Rebuild the project
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+
+- Adding new agents
+- Improving existing agents
+- Contributing code
+- Reporting issues
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
-For issues with:
-- **MCP Server**: Check logs and configuration
-- **Agent Responses**: Verify agent exists with `get_agent_info()`
-- **Integration**: Ensure MCP protocol compatibility
+- **Issues**: [GitHub Issues](https://github.com/jenksy/agents-mcp/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jenksy/agents-mcp/discussions)
+- **Documentation**: [docs/](docs/)
 
-Transform your development workflow with specialized AI agents!
+---
+
+**Transform your development workflow with specialized AI agents!**

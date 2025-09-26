@@ -341,6 +341,15 @@ public class AgentService {
                     .ifPresent(recommended::add);
         }
 
+        if (lowerTask.contains("requirements") || lowerTask.contains("ticket") || lowerTask.contains("story") ||
+            lowerTask.contains("planning") || lowerTask.contains("breakdown") || lowerTask.contains("epic") ||
+            lowerTask.contains("project management") || lowerTask.contains("acceptance criteria")) {
+            agents.stream()
+                    .filter(agent -> agent.name().contains("requirements-analyst"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
+        }
+
         // If no specific recommendations, return top 3 most versatile agents
         if (recommended.isEmpty()) {
             return agents.stream().limit(3).toList();
@@ -404,6 +413,13 @@ public class AgentService {
             guidance.append("- Include monitoring, alerting, and incident response patterns\n");
             guidance.append("- Plan for zero-downtime deployments and rollback strategies\n");
             guidance.append("- Focus on observability and operational excellence\n");
+        } else if (agent.name().contains("requirements") || agent.name().contains("analyst")) {
+            guidance.append("- Break down high-level features into actionable user stories\n");
+            guidance.append("- Define clear acceptance criteria using Given-When-Then format\n");
+            guidance.append("- Identify dependencies and integration points across systems\n");
+            guidance.append("- Provide estimation guidance and complexity assessment\n");
+            guidance.append("- Structure tickets with comprehensive implementation details\n");
+            guidance.append("- Include risk assessment and mitigation strategies\n");
         } else {
             guidance.append("- Apply domain-specific best practices and industry standards\n");
             guidance.append("- Focus on maintainability, testability, and documentation\n");

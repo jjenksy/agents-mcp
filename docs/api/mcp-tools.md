@@ -2,7 +2,9 @@
 
 ## Overview
 
-The AI Agents MCP Server provides 6 specialized tools for interacting with 20+ domain-expert AI agents. These tools have been **optimized for VS Code Copilot integration** with 75% smaller responses and smarter usage guidance.
+The AI Agents MCP Server provides 6 specialized tools for interacting with 20+ domain-expert AI agents. These tools are called automatically by VS Code Copilot when you make natural language requests - you never call them directly.
+
+**Important:** In VS Code Copilot, you interact using natural language. The tool syntax shown in this reference is for understanding what happens behind the scenes, not for direct usage.
 
 ## Tool Categories
 
@@ -77,34 +79,27 @@ The AI Agents MCP Server provides 6 specialized tools for interacting with 20+ d
 ```
 ```
 
-#### Usage Examples
+#### How to Use in VS Code Copilot
 
-**Basic Usage:**
-```javascript
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Design a RAG system for document search",
-  "context": "Spring Boot app with 10M+ documents"
-})
+**Natural Language Request Examples:**
+
+**RAG System Design:**
+```
+"I need the ai-engineer agent to help design a RAG system for document search in a Spring Boot app with 10M+ documents"
 ```
 
 **API Design:**
-```javascript
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a user management API with role-based access",
-  "context": "Spring Boot, expecting 100k users, microservices architecture"
-})
+```
+"Please use the backend-architect agent to design a user management API with role-based access for a Spring Boot application expecting 100k users in a microservices architecture"
 ```
 
 **Security Review:**
-```javascript
-@workspace Use invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review OAuth implementation for vulnerabilities",
-  "context": "Spring Security 6, PKCE flow, mobile app integration"
-})
 ```
+"Can the security-auditor agent review our OAuth implementation for vulnerabilities? We're using Spring Security 6 with PKCE flow for mobile app integration"
+```
+
+**What happens behind the scenes:**
+VS Code Copilot automatically translates your natural language into the appropriate `invoke_agent` tool call with extracted parameters.
 
 #### Error Responses
 
@@ -146,13 +141,16 @@ Returns an array of 1-3 `Agent` objects:
 ]
 ```
 
-#### Usage Examples
+#### How to Use in VS Code Copilot
 
-```javascript
-@workspace Use get_recommended_agents("optimize database performance")
-@workspace Use get_recommended_agents("build microservices API")
-@workspace Use get_recommended_agents("implement caching layer")
+**Natural Language Requests:**
 ```
+"Which agents can help me optimize database performance?"
+"What agents are best for building microservices APIs?"
+"Show me agents that can help implement a caching layer"
+```
+
+**Behind the scenes:** VS Code Copilot calls `get_recommended_agents` with your query
 
 #### Recommendation Logic
 
@@ -194,11 +192,16 @@ Returns an array of all `Agent` objects:
 ]
 ```
 
-#### Usage Examples
+#### How to Use in VS Code Copilot
 
-```javascript
-@workspace Use get_agents()
+**Natural Language Request:**
 ```
+"Show me all available AI agents"
+"List all the agents"
+"What agents do you have?"
+```
+
+**Behind the scenes:** VS Code Copilot calls `get_agents()`
 
 **When to Use:**
 - Browse all available agents
@@ -221,14 +224,17 @@ Returns an array of all `Agent` objects:
 
 Returns filtered array of `Agent` objects matching the query.
 
-#### Usage Examples
+#### How to Use in VS Code Copilot
 
-```javascript
-@workspace Use find_agents("security")     // Security-related agents
-@workspace Use find_agents("java")         // Java specialists
-@workspace Use find_agents("database")     // Database experts
-@workspace Use find_agents("cloud")        // Cloud architects
+**Natural Language Requests:**
 ```
+"Show me security-related agents"
+"What agents specialize in Java?"
+"Find agents that work with databases"
+"Which agents handle cloud architecture?"
+```
+
+**Behind the scenes:** VS Code Copilot calls `find_agents` with the appropriate search term
 
 #### Search Scope
 
@@ -253,12 +259,16 @@ The search looks through:
 
 Returns a single `Agent` object or `null` if not found.
 
-#### Usage Examples
+#### How to Use in VS Code Copilot
 
-```javascript
-@workspace Use get_agent_info("ai-engineer")
-@workspace Use get_agent_info("backend-architect")
+**Natural Language Requests:**
 ```
+"Tell me about the ai-engineer agent"
+"What can the backend-architect agent do?"
+"Describe the ai-engineer agent's capabilities"
+```
+
+**Behind the scenes:** VS Code Copilot calls `get_agent_info` with the agent name
 
 **When to Use:**
 - Get agent capabilities before invoking
@@ -290,82 +300,69 @@ Raw System Prompt:
 You are an AI engineer specializing in production-grade LLM applications...
 ```
 
-#### Migration Guide
+#### How to Use in VS Code Copilot
 
-**Old Pattern:**
-```javascript
-@workspace Use get_agent_prompt("ai-engineer")
-// Then manually apply the system prompt
+**Note:** This is a legacy tool. Use natural language requests instead:
+
+**Instead of trying to get raw prompts, just ask for help:**
+```
+"Use the ai-engineer agent to help design a RAG system for a Spring Boot app with a vector database"
 ```
 
-**New Optimized Pattern:**
-```javascript
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Design a RAG system",
-  "context": "Spring Boot app with vector database"
-})
-```
+This provides better, more contextual results than accessing raw system prompts.
 
 ---
 
 ## Best Practices
 
-### Optimal Usage Patterns
+### Optimal Natural Language Patterns
 
-#### ✅ Single-Call Workflow (Recommended)
+#### ✅ Direct Agent Request (Recommended)
 
-```javascript
-// Get everything you need in one efficient call
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a microservices API for user management",
-  "context": "Spring Boot, Kubernetes, expecting 1M+ users"
-})
+```
+"Please use the backend-architect agent to design a microservices API for user management with Spring Boot and Kubernetes, expecting 1M+ users"
 ```
 
-#### ✅ Smart Discovery
+**Why this works:** VS Code Copilot extracts the agent name, task, and context from your natural language and makes the appropriate tool call.
 
-```javascript
-// Get targeted recommendations
-@workspace Use get_recommended_agents("implement caching strategy")
+#### ✅ Smart Discovery Flow
 
-// Then use the recommended agent
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Implement Redis caching for user sessions",
-  "context": "High-traffic e-commerce site, 10k concurrent users"
-})
+```
+// First, discover agents
+"Which agents can help implement a caching strategy?"
+
+// Then use the recommendation
+"Use the database-optimizer agent to implement Redis caching for user sessions on our high-traffic e-commerce site with 10k concurrent users"
 ```
 
-#### ❌ Inefficient Multiple Calls
+#### ❌ What NOT to Do
 
-```javascript
-// Avoid: Multiple calls for the same information
-@workspace Use get_agent_info("ai-engineer")
-@workspace Use get_agent_prompt("ai-engineer")
-@workspace Use invoke_agent({...})  // Much of this info is redundant
+```
+// Don't try to write tool syntax - it won't work in VS Code
+@workspace Use invoke_agent({...})  // This syntax doesn't work
+
+// Don't make vague requests
+"Help with stuff"  // Too vague for agents to provide value
 ```
 
-### Context Best Practices
+### Context Best Practices for Natural Language
 
-**Provide Rich Context:**
-```javascript
-invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review authentication system",
-  "context": "Spring Security 6, JWT tokens, microservices, 100k users, PCI compliance required"
-})
+**✅ Provide Rich Context:**
+```
+"I need the security-auditor agent to review our authentication system. We're using Spring Security 6 with JWT tokens in a microservices architecture for 100k users, and need PCI compliance."
 ```
 
-**Avoid Vague Context:**
-```javascript
-invoke_agent({
-  "agentName": "security-auditor",
-  "task": "check security",
-  "context": "web app"
-})
+**❌ Avoid Vague Requests:**
 ```
+"Check security for web app"  // Too vague
+"Help with authentication"    // Missing context
+```
+
+**Key elements to include:**
+- Technology stack (Spring Security 6, JWT)
+- Architecture (microservices)
+- Scale (100k users)
+- Requirements (PCI compliance)
 
 ### Response Processing
 
@@ -449,25 +446,25 @@ The MCP server includes built-in rate limiting and automatic cleanup of expired 
 
 ### VS Code Copilot Integration
 
-```javascript
-// In VS Code Copilot Chat
-@workspace Use invoke_agent({
-  "agentName": "java-pro",
-  "task": "Optimize this Stream processing code",
-  "context": "Processing 1M records, memory constraints, Java 21"
-})
+**In VS Code Copilot Chat, use natural language:**
 ```
+"Can the java-pro agent help optimize this Stream processing code? We're processing 1M records with memory constraints on Java 21."
+```
+
+**Remember:** VS Code Copilot translates your natural language into MCP tool calls automatically. You focus on describing your needs, not learning tool syntax.
 
 ### Claude Desktop Integration
 
+**In Claude Desktop, you can use the actual tool syntax:**
 ```javascript
-// In Claude Desktop
 invoke_agent({
   "agentName": "cloud-architect",
   "task": "Design AWS infrastructure for microservices",
   "context": "15 services, auto-scaling, cost optimization required"
 })
 ```
+
+**Note:** Unlike VS Code Copilot, Claude Desktop exposes the actual MCP tool interface. VS Code Copilot requires natural language instead.
 
 ---
 

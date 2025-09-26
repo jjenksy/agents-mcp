@@ -180,46 +180,39 @@ The new `invoke_agent` responses follow this optimized structure:
 
 ---
 
-## Migration Guide
+## Understanding the Natural Language Interface
 
-### Updating Existing Workflows
+### How Your Requests Are Translated
 
-#### If You Currently Use `get_agent_prompt`
+#### The Key Concept: Natural Language First
 
-**Before:**
-```javascript
-@workspace Use get_agent_prompt("backend-architect")
-// Then manually apply: "You are a backend architect... Design an API for..."
+**What you type (natural language):**
+```
+"Use the backend-architect agent to design a user management API for a Spring Boot microservices application with 100k users and role-based access"
 ```
 
-**After:**
+**What VS Code Copilot does behind the scenes:**
 ```javascript
-@workspace Use invoke_agent({
+// Automatic translation - you never write this
+invoke_agent({
   "agentName": "backend-architect",
   "task": "Design a user management API",
   "context": "Spring Boot, microservices, 100k users, role-based access"
 })
 ```
 
-#### If You Use Multiple Tool Calls
+#### Progressive Discovery Through Conversation
 
-**Before:**
-```javascript
-@workspace Use find_agents("database")
-@workspace Use get_agent_info("database-optimizer")
-@workspace Use get_agent_prompt("database-optimizer")
-```
+**Natural conversation flow:**
 
-**After:**
-```javascript
-@workspace Use get_recommended_agents("database performance")
-// Then directly use the recommended agent:
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Fix slow query performance",
-  "context": "PostgreSQL, 1M+ records, complex joins taking 5+ seconds"
-})
-```
+1. **Discovery:** "Which agents can help with database optimization?"
+2. **Information:** "Tell me about the database-optimizer agent"
+3. **Usage:** "Use the database-optimizer agent to help fix slow query performance in PostgreSQL with 1M+ records and complex joins taking 5+ seconds"
+
+**Each request triggers appropriate MCP tools automatically:**
+- Discovery → `get_recommended_agents` or `find_agents`
+- Information → `get_agent_info`
+- Usage → `invoke_agent` with extracted context
 
 ### Backward Compatibility
 
@@ -366,69 +359,64 @@ tail -f logs/mcp-server.log | grep "tool.*invoked"
 
 ## Advanced Usage Patterns
 
-### 1. Context Chaining
+### 1. Context Chaining Through Conversation
 
-```javascript
-// First call establishes context
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design microservices architecture for e-commerce platform",
-  "context": "100k users, Spring Boot, Kubernetes, event-driven"
-})
-
-// Follow-up calls can reference the same context
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Design database schema for the e-commerce microservices",
-  "context": "From previous: 100k users, event-driven architecture, need ACID compliance"
-})
+**First request:**
+```
+"Use the backend-architect agent to design a microservices architecture for an e-commerce platform with 100k users, using Spring Boot, Kubernetes, and event-driven patterns"
 ```
 
-### 2. Multi-Domain Workflows
-
-```javascript
-// Architecture planning
-@workspace Use invoke_agent({
-  "agentName": "architect-review",
-  "task": "Review system design for scalability concerns",
-  "context": "Microservices with API Gateway, expecting 10x growth"
-})
-
-// Security assessment
-@workspace Use invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Audit the planned architecture for security vulnerabilities",
-  "context": "Same microservices system, handles PII and payment data"
-})
-
-// Deployment strategy
-@workspace Use invoke_agent({
-  "agentName": "deployment-engineer",
-  "task": "Plan CI/CD pipeline for the secure microservices architecture",
-  "context": "Same system, need zero-downtime deployments, compliance requirements"
-})
+**Follow-up request (referencing context):**
+```
+"Now use the database-optimizer agent to design the database schema for those e-commerce microservices we just discussed, keeping in mind the 100k users and event-driven architecture, with ACID compliance"
 ```
 
-### 3. Progressive Refinement
+**How it works:** VS Code Copilot maintains conversation context, allowing you to reference previous discussions naturally.
 
-```javascript
-// Start broad
-@workspace Use get_recommended_agents("improve application performance")
+### 2. Multi-Domain Workflows Through Natural Requests
 
-// Get specific guidance
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Optimize database performance for user queries",
-  "context": "PostgreSQL, 500k users, complex search queries taking 3-5s"
-})
-
-// Deep dive into specific optimization
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Design indexing strategy for full-text search on product descriptions",
-  "context": "Same PostgreSQL setup, 1M products, searching by name/description/tags"
-})
+**Architecture planning:**
 ```
+"I need the architect-review agent to review my system design for scalability concerns. It's a microservices architecture with an API Gateway, and we're expecting 10x growth."
+```
+
+**Security assessment:**
+```
+"Can the security-auditor agent audit the architecture we just discussed for security vulnerabilities? It will handle PII and payment data."
+```
+
+**Deployment strategy:**
+```
+"Use the deployment-engineer agent to plan a CI/CD pipeline for this secure microservices architecture, with zero-downtime deployments and compliance requirements"
+```
+
+**Natural flow benefits:**
+- Reference previous context naturally ("the architecture we just discussed")
+- Build on earlier responses without repetition
+- Maintain conversation continuity
+
+### 3. Progressive Refinement Through Natural Dialogue
+
+**Start broad:**
+```
+"Which agents can help me improve application performance?"
+```
+
+**Get specific guidance:**
+```
+"Use the database-optimizer agent to optimize database performance for user queries. I'm using PostgreSQL with 500k users, and complex search queries are taking 3-5 seconds."
+```
+
+**Deep dive into specifics:**
+```
+"Can the same agent help me design an indexing strategy specifically for full-text search on product descriptions? Still the same PostgreSQL setup, but now dealing with 1M products being searched by name, description, and tags."
+```
+
+**Natural progression:**
+- Start with discovery questions
+- Progressively add detail
+- Reference previous context ("same PostgreSQL setup")
+- Build expertise through conversation
 
 ---
 

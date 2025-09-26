@@ -12,7 +12,7 @@
 **Install with one command:**
 
 ```bash
-curl -sSL https://github.com/jenksy/agents-mcp/raw/main/scripts/install.sh | bash
+curl -sSL https://github.com/jjenksy/agents-mcp/raw/main/scripts/install.sh | bash
 ```
 
 **Use with VS Code:**
@@ -24,8 +24,10 @@ code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenk
 **Test it works:**
 
 ```
-@workspace Use get_agents()
+Please list all available AI agents
 ```
+
+> **How it works**: VS Code Copilot automatically translates your natural language request into MCP tool calls behind the scenes
 
 ## What You Get
 
@@ -56,7 +58,7 @@ Instead of manually crafting prompts, invoke specialized agents with domain expe
 
 ```bash
 # Download and run installer
-curl -sSL https://github.com/jenksy/agents-mcp/raw/main/scripts/install.sh | bash
+curl -sSL https://github.com/jjenksy/agents-mcp/raw/main/scripts/install.sh | bash
 ```
 
 The script will:
@@ -67,21 +69,23 @@ The script will:
 
 ### Option 2: Manual Installation
 
-**Once a release is available:**
+**Download the latest release:**
 
 ```bash
-# Download latest JAR (after first release is created)
-curl -L https://github.com/jenksy/agents-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
+# Download latest JAR from GitHub releases
+curl -L https://github.com/jjenksy/agents-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
 
 # Configure VS Code
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
 ```
 
-**For now, build from source:**
+### Option 3: Build from Source
+
+**For development or custom builds:**
 
 ```bash
 # Clone and build
-git clone https://github.com/jenksy/agents-mcp.git
+git clone https://github.com/jjenksy/agents-mcp.git
 cd agents-mcp
 ./gradlew clean build
 
@@ -177,89 +181,98 @@ Add to your `claude_desktop_config.json`:
 - **mermaid-expert** - Diagrams for flowcharts, sequences, ERDs, and architectures
 - **debugger** - Error analysis, test failures, unexpected behavior
 
-## MCP Tools Reference
+## How to Use Agents in VS Code Copilot
 
-> **🚀 VS Code Copilot Optimized**: These tools have been optimized specifically for VS Code integration with reduced response sizes and smarter usage guidance.
+> **Important**: VS Code Copilot uses natural language! You don't call MCP tools directly - just describe what you need, and Copilot translates your request into the appropriate tool calls.
 
-### Primary Tools (Optimized Workflow)
+### Natural Language Usage Examples
 
-#### `invoke_agent(invocation)` ⭐ **Recommended**
+#### Getting Agent Help
 
-Get concise, task-specific guidance from specialized agents. **75% smaller responses** optimized for VS Code Copilot consumption.
+**Instead of calling tools directly, just ask naturally:**
 
-**Optimized Response Format:**
-
-- Structured markdown for better readability
-- Focused recommendations (3-4 actionable steps)
-- Expert context included inline
-- Automatic context caching
-
-**Example:**
-
-```javascript
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a RESTful API for user management",
-  "context": "Spring Boot application with JWT authentication"
-})
+```
+"Please use the backend-architect agent to design a RESTful API for user management with JWT authentication in Spring Boot"
 ```
 
-#### `get_recommended_agents(task)`
+**What happens behind the scenes:**
+1. VS Code Copilot understands your request
+2. It automatically calls the appropriate MCP tool (`invoke_agent`)
+3. The agent's specialized guidance is used to formulate the response
+4. You get expert advice without needing to know the tool syntax
 
-Get 1-3 best agents for your task with usage guidance. More efficient than browsing all agents.
+**More Examples:**
 
-**Example:**
+```
+"I need the ai-engineer agent to help design a RAG system for document search in a Spring Boot app with 10M+ documents"
 
-```javascript
-@workspace Use get_recommended_agents("optimize database performance")
+"Can the security-auditor agent review this authentication implementation for vulnerabilities?"
+
+"Use the database-optimizer agent to help optimize these slow PostgreSQL queries"
 ```
 
-### Discovery Tools
+### Discovering the Right Agent
 
-#### `get_agents()`
+**Ask for recommendations naturally:**
 
-List all available agents. Use `find_agents` to search by domain, or `invoke_agent` for task-specific guidance.
+```
+"Which agents can help me optimize database performance?"
 
-#### `find_agents(query)`
+"What agents are available for security auditing?"
 
-Search agents by domain keywords. Use `invoke_agent` after finding the right agent for task-specific guidance.
-
-**Examples:**
-
-```javascript
-@workspace Use find_agents("backend")      // Find backend-related agents
-@workspace Use find_agents("security")     // Find security specialists
+"Show me agents that can help with React performance optimization"
 ```
 
-#### `get_agent_info(agentName)`
+VS Code Copilot will automatically use the `get_recommended_agents` tool to suggest the best agents for your task.
 
-Get agent capabilities and description. Use `invoke_agent` for actionable task guidance instead of just information.
+### Browsing Available Agents
 
-**Example:**
-
-```javascript
-@workspace Use get_agent_info("ai-engineer")
+**List all agents:**
+```
+"Show me all available AI agents"
+"What agents do you have?"
+"List all the specialized agents"
 ```
 
-### Optimized Usage Patterns
-
-**Best Practice - Single Tool Call:**
-
-```javascript
-// ✅ Optimized: Get everything you need in one call
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Build a RAG system for document search",
-  "context": "Spring Boot app with 10M+ documents"
-})
+**Search by domain:**
+```
+"Show me agents related to backend development"
+"What security-focused agents are available?"
+"Find agents that can help with database optimization"
 ```
 
-**Avoid - Multiple Tool Calls:**
+**Get specific agent details:**
+```
+"Tell me about the ai-engineer agent"
+"What can the backend-architect agent do?"
+"Describe the security-auditor agent's capabilities"
+```
 
-```javascript
-// ❌ Inefficient: Multiple calls for the same information
-@workspace Use get_agent_info("ai-engineer")
-@workspace Use invoke_agent({...})
+### Best Practices for Natural Language Requests
+
+**✅ Good: Specific, Context-Rich Requests**
+
+```
+"Please use the ai-engineer agent to help me build a RAG system for document search in a Spring Boot application with 10M+ documents that needs sub-second response times"
+```
+
+This gives VS Code Copilot everything it needs to make an effective MCP tool call with proper context.
+
+**❌ Avoid: Vague Requests**
+
+```
+"Help with AI stuff"
+"Fix my code"
+```
+
+These don't provide enough context for the agents to give useful guidance.
+
+**✅ Good: Progressive Refinement**
+
+```
+1. "Which agents can help with database optimization?"
+2. "Use the database-optimizer agent to help optimize PostgreSQL queries for a user search feature with 2M records"
+3. "Can you focus on indexing strategies for the email and username columns?"
 ```
 
 ## Development
@@ -320,12 +333,11 @@ This will:
 
 ### Agent Not Found
 
-```bash
-# List all available agents
-get_agents()
-
-# Search for similar agents
-find_agents("your-domain")
+**Ask naturally in VS Code Copilot:**
+```
+"Show me all available agents"
+"What agents are available for [your-domain]?"
+"List agents related to backend development"
 ```
 
 ### VS Code Not Connecting
@@ -354,8 +366,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-- **Issues**: [GitHub Issues](https://github.com/jenksy/agents-mcp/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/jenksy/agents-mcp/discussions)
+- **Issues**: [GitHub Issues](https://github.com/jjenksy/agents-mcp/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/jjenksy/agents-mcp/discussions)
 - **Documentation**: [docs/](docs/)
 
 ---

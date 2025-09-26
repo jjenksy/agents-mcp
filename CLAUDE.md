@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Important Instructions
+
+**NEVER USE EMOJIS** - This project strictly prohibits the use of emojis in any files, documentation, code comments, or communication. Always use plain text only.
+
 ## Project Overview
 
 This is a Model Context Protocol (MCP) server built with Spring Boot that provides AI agent functionality for integration with tools like VS Code Copilot and Claude Desktop. The server exposes a comprehensive collection of specialized AI agents that can be invoked for domain-specific tasks, similar to Claude Code's built-in agent system.

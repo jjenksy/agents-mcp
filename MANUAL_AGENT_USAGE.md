@@ -1,34 +1,29 @@
 # Manual Agent Usage Guide
 
-> **🚀 NEW**: The MCP server has been optimized with 75% smaller responses and better workflow patterns. This guide shows both optimized MCP usage and manual fallback methods.
+> **🚀 Important Update**: VS Code Copilot uses natural language interaction, not direct tool syntax! You speak naturally, and Copilot translates to MCP tool calls automatically.
 
-Since VS Code MCP integration may not be working yet, here's how to use the agents manually and with optimized MCP workflows.
+This guide explains how MCP tools actually work in different environments and provides manual fallback methods.
 
 ## Quick Agent Access
 
-### 1. Use Claude Desktop (Working) - Optimized Workflow ⭐
-The MCP server works perfectly in Claude Desktop with **optimized responses**:
+### 1. Use Claude Desktop (Direct Tool Syntax Works)
+Claude Desktop exposes the actual MCP tool interface:
 
 ```javascript
-// ✅ RECOMMENDED: Get everything in one optimized call
+// Claude Desktop allows direct tool calls
 invoke_agent({
   "agentName": "backend-architect",
   "task": "Design a REST API for user management",
   "context": "Spring Boot application with PostgreSQL, expecting 100k users"
 })
-// Returns structured 1.5KB response vs 6KB+ with old workflow
 
-// 🔍 Smart agent discovery
+// Other tools work directly too
 get_recommended_agents("optimize database performance")
-// Returns 1-3 best agents with usage guidance
-
-// 📄 Browse all agents (when needed)
 get_agents()
-
-// ⚠️ LEGACY: Still works but less efficient
-get_agent_prompt("ai-engineer")
-// Now includes deprecation notice and migration guidance
+get_agent_info("ai-engineer")
 ```
+
+**Note:** This direct syntax ONLY works in Claude Desktop, not in VS Code Copilot!
 
 ### 2. Manual Agent Prompts for VS Code
 
@@ -161,37 +156,40 @@ Check the `agents/` directory for complete system prompts:
 - `agents/database-optimizer.md` - Database performance
 - `agents/debugger.md` - Error analysis and troubleshooting
 
-## When VS Code MCP Works - Optimized Workflow ⭐
+## How VS Code Copilot Actually Works ⭐
 
-Once VS Code properly connects to the MCP server, use these **optimized patterns**:
+VS Code Copilot uses **natural language**, not tool syntax:
 
-### Recommended Workflow
-```javascript
-// ✅ Primary: Get focused, actionable guidance
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Design a RAG system for document search",
-  "context": "Spring Boot app, 10M documents, need <200ms response"
-})
-// 75% smaller responses, structured markdown, context-aware
+### Natural Language Interaction
+```
+// ✅ CORRECT: Natural language requests
+"Please use the ai-engineer agent to design a RAG system for document search in a Spring Boot app with 10M documents needing <200ms response time"
 
-// ✅ Discovery: Find the right agent
-@workspace Use get_recommended_agents("implement microservices security")
-// Returns 1-3 best agents with usage guidance
+// ✅ CORRECT: Discovery through conversation
+"Which agents can help implement microservices security?"
+
+// ❌ WRONG: This syntax doesn't work in VS Code
+@workspace Use invoke_agent({...})  // Won't work!
 ```
 
-### Available Tools
-- `@workspace Use invoke_agent(...)` - ⭐ **Optimized structured guidance**
-- `@workspace Use get_recommended_agents("task")` - ⭐ **Smart agent discovery**
-- `@workspace Use get_agents()` - List all agents
-- `@workspace Use find_agents("domain")` - Search by keywords
-- `@workspace Use get_agent_info("name")` - Agent details
-- `@workspace Use get_agent_prompt("name")` - ⚠️ **Legacy (prefer invoke_agent)**
+### What Happens Behind the Scenes
+When you type naturally, VS Code Copilot:
+1. Parses your natural language
+2. Identifies the agent and task
+3. Extracts context from your description
+4. Calls the appropriate MCP tool automatically
+5. Uses the agent's response to guide its answer
 
-### Migration Benefits
-- **75% faster responses** with smaller payloads
-- **Better formatting** with structured markdown
-- **Context integration** for relevant recommendations
-- **Single-call efficiency** vs multiple tool calls
+### Key Differences Between Environments
 
-Until MCP works, the manual approach above gives you the same specialized expertise!
+| Environment | How to Use | Example |
+|------------|------------|----------|
+| **VS Code Copilot** | Natural language only | "Use the ai-engineer agent to help..." |
+| **Claude Desktop** | Direct tool syntax | `invoke_agent({...})` |
+| **Manual (Copy/Paste)** | Paste agent prompt | Copy prompt from agents/ directory |
+
+### Benefits of Natural Language in VS Code
+- **More intuitive** - Just describe what you need
+- **No syntax to learn** - Copilot handles the technical parts
+- **Context preserved** - Natural conversation flow
+- **Automatic optimization** - Copilot manages tool calls efficiently

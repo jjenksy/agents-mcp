@@ -42,80 +42,73 @@ The `.vscode/mcp.json` file is pre-configured:
 - Press `Ctrl+Shift+I` (Windows/Linux) or `Cmd+Shift+I` (Mac)
 - Or use Command Palette: `> GitHub Copilot: Open Chat`
 
-### Optimized Agent Commands ⭐
+### How to Use Agents ⭐
+
+**Important:** You interact with agents using natural language! VS Code Copilot automatically translates your requests into MCP tool calls behind the scenes.
 
 **Primary Workflow (Recommended):**
-```javascript
-// Get everything you need in one efficient call
-@workspace Use invoke_agent({
-  "agentName": "ai-engineer",
-  "task": "Design a RAG system for document search",
-  "context": "Spring Boot app with 10M+ documents"
-})
 
-// Smart agent discovery
-@workspace Use get_recommended_agents("build microservices API")
+```
+"Please use the ai-engineer agent to design a RAG system for document search in a Spring Boot app with 10M+ documents"
 ```
 
-**Discovery Commands:**
-```javascript
-// List all available agents
-@workspace Use get_agents()
+**What happens:**
+1. Copilot understands your natural language request
+2. It automatically calls the appropriate MCP tool (`invoke_agent`)
+3. The agent's expertise guides the response
+4. You get specialized advice without knowing tool syntax
 
-// Find agents by domain
-@workspace Use find_agents("security")
+**Agent Discovery:**
 
-// Get agent details
-@workspace Use get_agent_info("ai-engineer")
+```
+"Which agents can help me build microservices APIs?"
+"Show me all available AI agents"
+"What agents specialize in security?"
+"Tell me about the ai-engineer agent"
 ```
 
 
-### Optimized Example Workflows
+### Real-World Example Workflows
 
-#### 1. Complete Code Review (Single Call) ⭐
+#### 1. Complete Code Review ⭐
+
+**Just ask naturally:**
 ```
-@workspace Use invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review authentication implementation for security vulnerabilities",
-  "context": "JWT-based auth with refresh tokens, Redis session store"
-})
+"I need the security-auditor agent to review my authentication implementation for security vulnerabilities. It uses JWT-based auth with refresh tokens and Redis for session storage."
 ```
 
 #### 2. API Design with Context ⭐
+
 ```
-@workspace Use invoke_agent({
-  "agentName": "backend-architect",
-  "task": "Design a user management API with role-based access",
-  "context": "Spring Boot app, expecting 100k users, microservices architecture"
-})
+"Please use the backend-architect agent to design a user management API with role-based access control for a Spring Boot application expecting 100k users in a microservices architecture"
 ```
 
 #### 3. Database Performance Analysis ⭐
+
 ```
-@workspace Use invoke_agent({
-  "agentName": "database-optimizer",
-  "task": "Optimize slow query performance",
-  "context": "PostgreSQL 15, queries taking 2-5 seconds, 500k records"
-})
+"Can the database-optimizer agent help me optimize slow query performance? I'm using PostgreSQL 15, and my queries are taking 2-5 seconds with 500k records."
 ```
 
 #### 4. Smart Agent Discovery
+
 ```
-@workspace Use get_recommended_agents("implement caching layer")
-// Returns 1-3 best agents with usage guidance
+"Which agents can help me implement a caching layer?"
+"What agents are best for microservices architecture?"
+"Show me agents that specialize in performance optimization"
 ```
 
-### Migration from Legacy Patterns
+### Natural Language is the Way
 
-**Optimized Pattern:**
+**How to request agent help:**
 ```
-@workspace Use invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review OAuth implementation",
-  "context": "Spring Security 6, PKCE flow, mobile app integration"
-})
-// Get focused, actionable guidance in one call
+"Use the security-auditor agent to review my OAuth implementation. It's using Spring Security 6 with PKCE flow for mobile app integration."
 ```
+
+**Why this works better:**
+- More natural and intuitive
+- VS Code Copilot handles the technical details
+- You focus on describing your needs, not learning tool syntax
+- The agent still provides focused, actionable guidance
 
 ## Development Commands
 
@@ -159,10 +152,10 @@ Launch configurations are pre-configured:
 4. Restart VS Code completely
 
 ### Agent Commands Not Working
-1. Ensure you're using `@workspace` prefix
+1. Remember: Use natural language, not direct tool calls
 2. Check Copilot Chat is properly connected
-3. Try the optimized workflow first: `@workspace Use invoke_agent({"agentName":"ai-engineer","task":"test connection","context":""})`
-4. For simple testing: `@workspace Use get_agents()`
+3. Try a simple request first: "Show me all available AI agents"
+4. Then try: "Use the ai-engineer agent to help me test the connection"
 
 ### Build Issues
 1. Ensure Java 21+ is installed: `java -version`
@@ -171,12 +164,15 @@ Launch configurations are pre-configured:
 
 ## Success!
 
-When properly configured, you'll have access to 20+ specialized AI agents with **VS Code Copilot optimized responses** directly in VS Code Copilot Chat. The optimized tools provide:
+When properly configured, you'll have access to 20+ specialized AI agents through natural language in VS Code Copilot Chat. The experience provides:
 
-✅ **75% smaller response sizes** for faster loading
-✅ **Structured markdown output** for better readability
-✅ **Smart usage guidance** to prevent redundant tool calls
-✅ **Context caching** for improved performance
-✅ **Claude Code-style agent functionality** in your development environment
+✅ **Natural language interaction** - Just describe what you need
+✅ **Automatic tool translation** - Copilot handles MCP calls for you
+✅ **75% smaller responses** - Optimized for faster loading
+✅ **Structured expert guidance** - Clear, actionable recommendations
+✅ **Context-aware responses** - Agents understand your specific situation
+✅ **Claude Code-style functionality** - Professional AI expertise in VS Code
+
+**Remember:** You don't need to learn tool syntax - just ask for help naturally, and VS Code Copilot will engage the right agent with the right context!
 
 Enjoy your enhanced development workflow with specialized AI expertise at your fingertips!

@@ -124,52 +124,52 @@ java -jar build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 4. **Try Global Config**: Add to user settings instead of workspace
 5. **Check Enterprise Policy**: If using Copilot Business/Enterprise
 
-## Optimized MCP Usage (When Working)
+## How to Use MCP in VS Code (When Working)
 
-Once MCP integration is working, use these **optimized patterns** for best results:
+Once MCP integration is working, use **natural language** in VS Code Copilot:
 
-### ✅ Recommended: Single-Call Workflow
-```javascript
-// Get everything you need in one efficient call
-@workspace Use invoke_agent({
-  "agentName": "security-auditor",
-  "task": "Review authentication implementation for vulnerabilities",
-  "context": "Spring Security 6, JWT tokens, microservices architecture"
-})
+### ✅ Correct: Natural Language Requests
+```
+"I need the security-auditor agent to review our authentication implementation for vulnerabilities. We're using Spring Security 6 with JWT tokens in a microservices architecture."
 ```
 
-**Benefits:**
-- 75% smaller response size (~1.5KB vs 6KB+)
-- Structured markdown format for better readability
-- Context-aware recommendations
-- All guidance in single response
+**How it works:**
+- You type naturally in Copilot Chat
+- VS Code Copilot parses your request
+- It automatically calls the appropriate MCP tools
+- You get expert guidance without knowing tool syntax
 
-### ❌ Avoid: Legacy Multiple-Call Pattern
+### ❌ Wrong: Direct Tool Syntax (Doesn't Work)
 ```javascript
-// Less efficient (still works but not optimized)
-@workspace Use get_agent_info("security-auditor")
-@workspace Use get_agent_prompt("security-auditor")
-// Then manually construct request
+// This syntax doesn't work in VS Code Copilot
+@workspace Use invoke_agent({...})  // Won't work!
+@workspace Use get_agent_info("security-auditor")  // Won't work!
 ```
+
+**Remember:** VS Code Copilot is designed for natural language interaction, not direct tool calls.
 
 ## Fallback: Manual Agent Usage
 
-If MCP integration doesn't work immediately, you can manually use agents by:
+If MCP integration doesn't work immediately, you have options:
 
-1. **Get Optimized Guidance**: Use Claude Desktop with optimized workflow
-2. **Copy Structured Results**: Use the markdown-formatted responses
-3. **Example**:
-   ```
-   # In Claude Desktop (optimized):
-   invoke_agent({
-     "agentName": "security-auditor",
-     "task": "Review authentication code",
-     "context": "Spring Security JWT implementation"
-   })
+### Option 1: Use Claude Desktop (Direct Tools Work)
+```javascript
+// Claude Desktop supports direct tool syntax
+invoke_agent({
+  "agentName": "security-auditor",
+  "task": "Review authentication code",
+  "context": "Spring Security JWT implementation"
+})
+```
+Then copy the response to VS Code.
 
-   # Copy the structured response to VS Code
-   # Use the organized recommendations directly
-   ```
+### Option 2: Natural Language in VS Code (When MCP Works)
+```
+"Use the security-auditor agent to review my authentication code using Spring Security with JWT implementation"
+```
+
+### Option 3: Manual Prompt Copy
+Copy agent prompts from the `agents/` directory and paste into VS Code Copilot Chat.
 
 ## Report Issue
 

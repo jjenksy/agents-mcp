@@ -1,0 +1,28 @@
+spring:
+  main:
+    banner-mode: off
+  jpa:
+    show-sql: false
+
+logging:
+  level:
+    com.jenksy.jenksymcp: DEBUG
+    org.springframework.ai: DEBUG
+    org.springframework.cache: DEBUG
+  pattern:
+    console: "%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,caches
+  endpoint:
+    health:
+      show-details: always
+
+jenksy:
+  mcp:
+    agents:
+      hot-reload: false
+      test-mode: true

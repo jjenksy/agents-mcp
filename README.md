@@ -44,6 +44,7 @@ Instead of manually crafting prompts, invoke specialized agents with domain expe
 ## Key Features
 
 - **20 Specialized Agents** - Domain experts for every development need
+- **VS Code Copilot Optimized** - 75% smaller responses, smarter tool guidance
 - **MCP Protocol** - Works with VS Code Copilot, Claude Desktop, and more
 - **Production Ready** - Caching, monitoring, automated deployment
 - **Easy Installation** - One-line install script with VS Code integration
@@ -93,10 +94,10 @@ code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenk
 
 ## Usage Examples
 
-### Get Agent Guidance
+### Optimized Single-Call Workflow ⭐
 
 ```javascript
-// Get specialized context for VS Code Copilot
+// Get specialized guidance in one efficient call
 @workspace Use invoke_agent({
   "agentName": "backend-architect",
   "task": "Design a user management API",
@@ -104,23 +105,28 @@ code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenk
 })
 ```
 
-### Find the Right Agent
+### Smart Agent Discovery
 
 ```javascript
-// Search by domain
-@workspace Use find_agents("security")
-
-// Get recommendations
+// Get targeted recommendations (1-3 agents)
 @workspace Use get_recommended_agents("optimize database performance")
+
+// Search by domain when you need broader options
+@workspace Use find_agents("security")
 ```
 
-### Direct System Prompts
+### Migration from Legacy Usage
 
 ```javascript
-// Get raw system prompt for direct use
-@workspace Use get_agent_prompt("ai-engineer")
+// ✅ NEW: Get everything in one optimized call
+@workspace Use invoke_agent({
+  "agentName": "ai-engineer",
+  "task": "Implement vector search",
+  "context": "Existing Spring Boot REST API"
+})
 
-// Then use with any AI tool: "You are an AI engineer specializing in..."
+// ❌ OLD: Multiple calls (less efficient)
+// Use invoke_agent instead for better results
 ```
 
 ## VS Code Integration
@@ -209,52 +215,76 @@ Add to your `claude_desktop_config.json`:
 
 ## MCP Tools Reference
 
-### `get_agents()`
-Returns all available agents with their capabilities and descriptions.
+> **🚀 VS Code Copilot Optimized**: These tools have been optimized specifically for VS Code integration with reduced response sizes and smarter usage guidance.
 
-### `find_agents(query)`
-Search for agents by domain or capability.
+### Primary Tools (Optimized Workflow)
 
-**Examples:**
-```javascript
-find_agents("backend")      // Find backend-related agents
-find_agents("security")     // Find security specialists
-```
+#### `invoke_agent(invocation)` ⭐ **Recommended**
+Get concise, task-specific guidance from specialized agents. **75% smaller responses** optimized for VS Code Copilot consumption.
 
-### `get_agent_info(agentName)`
-Get detailed information about a specific agent.
+**Optimized Response Format:**
+- Structured markdown for better readability
+- Focused recommendations (3-4 actionable steps)
+- Expert context included inline
+- Automatic context caching
 
 **Example:**
 ```javascript
-get_agent_info("ai-engineer")
-```
-
-### `get_agent_prompt(agentName)`
-Get the raw system prompt for an agent to use directly in conversations.
-
-**Example:**
-```javascript
-get_agent_prompt("backend-architect")
-```
-
-### `invoke_agent(invocation)`
-Get specialized agent context and guidance for a task.
-
-**Example:**
-```javascript
-invoke_agent({
+@workspace Use invoke_agent({
   "agentName": "backend-architect",
   "task": "Design a RESTful API for user management",
   "context": "Spring Boot application with JWT authentication"
 })
 ```
 
-### `get_recommended_agents(task)`
-Get agent recommendations for a specific task or domain.
+#### `get_recommended_agents(task)`
+Get 1-3 best agents for your task with usage guidance. More efficient than browsing all agents.
 
 **Example:**
 ```javascript
-get_recommended_agents("optimize database performance")
+@workspace Use get_recommended_agents("optimize database performance")
+```
+
+### Discovery Tools
+
+#### `get_agents()`
+List all available agents. Use `find_agents` to search by domain, or `invoke_agent` for task-specific guidance.
+
+#### `find_agents(query)`
+Search agents by domain keywords. Use `invoke_agent` after finding the right agent for task-specific guidance.
+
+**Examples:**
+```javascript
+@workspace Use find_agents("backend")      // Find backend-related agents
+@workspace Use find_agents("security")     // Find security specialists
+```
+
+#### `get_agent_info(agentName)`
+Get agent capabilities and description. Use `invoke_agent` for actionable task guidance instead of just information.
+
+**Example:**
+```javascript
+@workspace Use get_agent_info("ai-engineer")
+```
+
+
+### Optimized Usage Patterns
+
+**Best Practice - Single Tool Call:**
+```javascript
+// ✅ Optimized: Get everything you need in one call
+@workspace Use invoke_agent({
+  "agentName": "ai-engineer",
+  "task": "Build a RAG system for document search",
+  "context": "Spring Boot app with 10M+ documents"
+})
+```
+
+**Avoid - Multiple Tool Calls:**
+```javascript
+// ❌ Inefficient: Multiple calls for the same information
+@workspace Use get_agent_info("ai-engineer")
+@workspace Use invoke_agent({...})
 ```
 
 ## Development

@@ -118,11 +118,13 @@ We organize agents into these categories:
 ### Areas for Code Contributions
 
 - **Core MCP Server** - Spring Boot application improvements
+- **MCP Tool Optimization** - Response format improvements, tool efficiency
 - **Agent Management** - Loading, caching, validation
 - **Performance** - Caching, optimization, monitoring
 - **Security** - Authentication, input validation, audit logging
+- **VS Code Integration** - Copilot-specific optimizations
 - **Developer Experience** - Tooling, debugging, documentation
-- **Testing** - Unit tests, integration tests, agent validation
+- **Testing** - Unit tests, integration tests, agent validation, MCP tool testing
 
 ### Code Contribution Process
 
@@ -198,13 +200,103 @@ Paste relevant logs here
 Any other relevant information
 ```
 
+## MCP Tool Development Guidelines
+
+### MCP Tool Standards (VS Code Optimized)
+
+When developing MCP tools, follow these standards for optimal VS Code Copilot integration:
+
+#### Response Format Standards
+
+**Optimized Response Structure:**
+```java
+// ✅ Good: Concise, structured response
+@Tool(description = "Get task-specific guidance. Use instead of get_agent_prompt for better results.")
+public AgentResponse invokeAgent(AgentInvocation invocation) {
+    return new AgentResponse(
+        agent.name(),
+        "mcp-optimized", // Generic identifier instead of specific model
+        buildStructuredGuidance(agent, invocation), // Markdown formatted
+        "success",
+        contextKey
+    );
+}
+```
+
+**Tool Description Best Practices:**
+- Include usage guidance to prevent redundant calls
+- Recommend preferred alternatives for deprecated tools
+- Specify optimal use cases
+- Keep descriptions under 100 characters when possible
+
+**Response Size Guidelines:**
+- Target 75% reduction from legacy responses
+- Use structured markdown (##, ###, bullet points)
+- Limit to 3-4 key recommendations
+- Include expert context inline, not as separate responses
+
+#### Tool Annotation Patterns
+
+```java
+// ✅ Optimized tool with guidance
+@Tool(
+    description = "Get concise task guidance. Use instead of get_agent_prompt for actionable results.",
+    name = "invoke_agent"
+)
+public AgentResponse invokeAgent(AgentInvocation invocation) {
+    // Implementation optimized for VS Code consumption
+}
+
+// ✅ Discovery tool with clear purpose
+@Tool(
+    description = "Get 1-3 best agents for your task. More efficient than browsing all agents.",
+    name = "get_recommended_agents"
+)
+public List<Agent> getRecommendedAgents(String task) {
+    // Return focused recommendations (limit 3)
+}
+
+// ✅ Legacy tool with deprecation notice
+@Tool(
+    description = "[LEGACY] Get raw system prompt. PREFER invoke_agent for task-specific guidance.",
+    name = "get_agent_prompt"
+)
+public String getAgentPrompt(String agentName) {
+    // Include migration guidance in response
+}
+```
+
+### Testing MCP Tools
+
+Ensure MCP tools work optimally with different clients:
+
+```java
+@Test
+void invokeAgent_shouldReturnOptimizedResponse() {
+    // Test response size is reasonable
+    AgentResponse response = agentService.invokeAgent(invocation);
+    assertThat(response.content().length()).isLessThan(2000); // Size limit
+    assertThat(response.content()).contains("##"); // Structured markdown
+    assertThat(response.model()).isEqualTo("mcp-optimized"); // Generic identifier
+}
+
+@Test
+void toolDescriptions_shouldIncludeUsageGuidance() {
+    // Verify tool descriptions guide optimal usage
+    Method method = AgentService.class.getMethod("invokeAgent", AgentInvocation.class);
+    Tool annotation = method.getAnnotation(Tool.class);
+    assertThat(annotation.description()).contains("Use instead of");
+}
+```
+
 ## Development Setup
 
 ### Prerequisites
 
 - **Java 21+** - [Download from Adoptium](https://adoptium.net/)
 - **Git** - Version control
-- **IDE** - IntelliJ IDEA, VS Code, or preferred Java IDE
+- **IDE** - IntelliJ IDEA, VS Code (with GitHub Copilot for testing), or preferred Java IDE
+- **VS Code with GitHub Copilot** - For testing MCP tool optimization
 
 ### Local Development
 
@@ -298,6 +390,8 @@ public class AgentService {
 - **Unit Tests** - Test individual components in isolation
 - **Integration Tests** - Test component interactions
 - **Agent Tests** - Validate agent definitions and responses
+- **MCP Tool Tests** - Validate tool responses, sizes, format optimization
+- **VS Code Integration Tests** - Test actual Copilot integration
 - **End-to-End Tests** - Full workflow testing
 
 ### Testing Guidelines

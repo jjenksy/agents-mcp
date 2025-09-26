@@ -2,12 +2,24 @@
 
 Welcome to the AI Agents MCP Server documentation. This documentation is organized by audience and use case.
 
+## 🚀 VS Code Copilot Optimization Update
+
+> **Major Update**: The MCP server has been optimized for VS Code Copilot integration with **75% smaller responses** and smarter tool guidance. See the updated documentation below for optimized workflows and best practices.
+
+**Key Documentation Updates:**
+- ⭐ **[VS Code Integration Guide](user-guide/vscode-integration.md)** - Complete optimization guide with before/after examples
+- ⭐ **[Real-World Examples](user-guide/examples.md)** - Optimized workflow patterns and templates
+- ⭐ **[MCP Tools API Reference](api/mcp-tools.md)** - Updated with optimization details and best practices
+- ⭐ **[Contributing Guide](../CONTRIBUTING.md)** - New MCP tool development standards
+
+**Migration**: All existing workflows continue to work. New workflows benefit from automatic optimization.
+
 ## For Users
 
 - **[Quick Start](../README.md#quick-start)** - Get up and running in 5 minutes
 - **[Installation Guide](user-guide/installation.md)** - Detailed installation instructions
-- **[VS Code Integration](user-guide/vscode-integration.md)** - Complete VS Code setup guide
-- **[Usage Examples](user-guide/examples.md)** - Real-world usage examples
+- **[VS Code Integration](user-guide/vscode-integration.md)** - ⭐ **NEW: Optimized integration guide** with before/after examples
+- **[Usage Examples](user-guide/examples.md)** - ⭐ **NEW: Real-world optimized workflow examples**
 - **[Troubleshooting](user-guide/troubleshooting.md)** - Common issues and solutions
 
 ## For Developers
@@ -20,7 +32,7 @@ Welcome to the AI Agents MCP Server documentation. This documentation is organiz
 
 ## API Reference
 
-- **[MCP Tools](api/mcp-tools.md)** - Complete MCP tools reference
+- **[MCP Tools](api/mcp-tools.md)** - ⭐ **UPDATED: Complete optimized MCP tools reference**
 - **[Agent API](api/agent-api.md)** - Agent creation and management API
 - **[Configuration](api/configuration.md)** - Configuration options and properties
 

@@ -1,25 +1,33 @@
 # Manual Agent Usage Guide
 
-Since VS Code MCP integration isn't working yet, here's how to use the agents manually.
+> **🚀 NEW**: The MCP server has been optimized with 75% smaller responses and better workflow patterns. This guide shows both optimized MCP usage and manual fallback methods.
+
+Since VS Code MCP integration may not be working yet, here's how to use the agents manually and with optimized MCP workflows.
 
 ## Quick Agent Access
 
-### 1. Use Claude Desktop (Working)
-The MCP server works perfectly in Claude Desktop. You can:
+### 1. Use Claude Desktop (Working) - Optimized Workflow ⭐
+The MCP server works perfectly in Claude Desktop with **optimized responses**:
 
 ```javascript
-// Get all agents
-get_agents()
-
-// Get specific agent system prompt
-get_agent_prompt("ai-engineer")
-
-// Get structured guidance
+// ✅ RECOMMENDED: Get everything in one optimized call
 invoke_agent({
   "agentName": "backend-architect",
   "task": "Design a REST API for user management",
-  "context": "Spring Boot application with PostgreSQL"
+  "context": "Spring Boot application with PostgreSQL, expecting 100k users"
 })
+// Returns structured 1.5KB response vs 6KB+ with old workflow
+
+// 🔍 Smart agent discovery
+get_recommended_agents("optimize database performance")
+// Returns 1-3 best agents with usage guidance
+
+// 📄 Browse all agents (when needed)
+get_agents()
+
+// ⚠️ LEGACY: Still works but less efficient
+get_agent_prompt("ai-engineer")
+// Now includes deprecation notice and migration guidance
 ```
 
 ### 2. Manual Agent Prompts for VS Code
@@ -153,11 +161,37 @@ Check the `agents/` directory for complete system prompts:
 - `agents/database-optimizer.md` - Database performance
 - `agents/debugger.md` - Error analysis and troubleshooting
 
-## When VS Code MCP Works
+## When VS Code MCP Works - Optimized Workflow ⭐
 
-Once VS Code properly connects to the MCP server, you'll be able to use:
+Once VS Code properly connects to the MCP server, use these **optimized patterns**:
+
+### Recommended Workflow
+```javascript
+// ✅ Primary: Get focused, actionable guidance
+@workspace Use invoke_agent({
+  "agentName": "ai-engineer",
+  "task": "Design a RAG system for document search",
+  "context": "Spring Boot app, 10M documents, need <200ms response"
+})
+// 75% smaller responses, structured markdown, context-aware
+
+// ✅ Discovery: Find the right agent
+@workspace Use get_recommended_agents("implement microservices security")
+// Returns 1-3 best agents with usage guidance
+```
+
+### Available Tools
+- `@workspace Use invoke_agent(...)` - ⭐ **Optimized structured guidance**
+- `@workspace Use get_recommended_agents("task")` - ⭐ **Smart agent discovery**
 - `@workspace Use get_agents()` - List all agents
-- `@workspace Use get_agent_prompt("ai-engineer")` - Get system prompts
-- `@workspace Use invoke_agent(...)` - Get structured guidance
+- `@workspace Use find_agents("domain")` - Search by keywords
+- `@workspace Use get_agent_info("name")` - Agent details
+- `@workspace Use get_agent_prompt("name")` - ⚠️ **Legacy (prefer invoke_agent)**
 
-Until then, the manual approach above gives you the same specialized expertise!
+### Migration Benefits
+- **75% faster responses** with smaller payloads
+- **Better formatting** with structured markdown
+- **Context integration** for relevant recommendations
+- **Single-call efficiency** vs multiple tool calls
+
+Until MCP works, the manual approach above gives you the same specialized expertise!

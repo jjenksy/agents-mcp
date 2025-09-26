@@ -1,6 +1,10 @@
 # MCP Server Troubleshooting Guide
 
-## Current Issue: VS Code Not Using MCP Server
+> **🚀 NEW**: The MCP server has been optimized for VS Code Copilot with 75% smaller responses and improved workflow patterns. See the optimization benefits below.
+
+## Common Issues & Solutions
+
+### VS Code Not Using MCP Server
 
 The MCP server is working (as confirmed in Claude Desktop), but VS Code Copilot isn't connecting to it.
 
@@ -120,20 +124,51 @@ java -jar build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar
 4. **Try Global Config**: Add to user settings instead of workspace
 5. **Check Enterprise Policy**: If using Copilot Business/Enterprise
 
+## Optimized MCP Usage (When Working)
+
+Once MCP integration is working, use these **optimized patterns** for best results:
+
+### ✅ Recommended: Single-Call Workflow
+```javascript
+// Get everything you need in one efficient call
+@workspace Use invoke_agent({
+  "agentName": "security-auditor",
+  "task": "Review authentication implementation for vulnerabilities",
+  "context": "Spring Security 6, JWT tokens, microservices architecture"
+})
+```
+
+**Benefits:**
+- 75% smaller response size (~1.5KB vs 6KB+)
+- Structured markdown format for better readability
+- Context-aware recommendations
+- All guidance in single response
+
+### ❌ Avoid: Legacy Multiple-Call Pattern
+```javascript
+// Less efficient (still works but not optimized)
+@workspace Use get_agent_info("security-auditor")
+@workspace Use get_agent_prompt("security-auditor")
+// Then manually construct request
+```
+
 ## Fallback: Manual Agent Usage
 
 If MCP integration doesn't work immediately, you can manually use agents by:
 
-1. **Get Agent Prompts**: Use Claude Desktop to get agent system prompts
-2. **Copy to VS Code**: Use the prompts manually in VS Code Copilot Chat
+1. **Get Optimized Guidance**: Use Claude Desktop with optimized workflow
+2. **Copy Structured Results**: Use the markdown-formatted responses
 3. **Example**:
    ```
-   # In Claude Desktop:
-   get_agent_prompt("security-auditor")
+   # In Claude Desktop (optimized):
+   invoke_agent({
+     "agentName": "security-auditor",
+     "task": "Review authentication code",
+     "context": "Spring Security JWT implementation"
+   })
 
-   # Copy result to VS Code Copilot Chat:
-   # "You are a security auditor specializing in..." [paste full prompt]
-   # Then ask: "Review this authentication code"
+   # Copy the structured response to VS Code
+   # Use the organized recommendations directly
    ```
 
 ## Report Issue

@@ -48,7 +48,6 @@ Agent tools are implemented using Spring AI's `@Tool` annotation in the AgentSer
 - `get_agents`: Returns all available AI agents
 - `find_agents`: Find agents by capability or domain
 - `get_agent_info`: Get detailed information about a specific agent
-- `get_agent_prompt`: Get raw system prompt for direct use in conversations
 - `invoke_agent`: Get specialized agent context and guidance for tasks
 - `get_recommended_agents`: Get recommended agents for a specific task
 
@@ -98,10 +97,9 @@ The MCP server can be used with VS Code Copilot extensions that support MCP prot
 ### Available MCP Tools
 
 Once configured, you'll have access to these tools:
-- **get_agents**: List all 83+ specialized AI agents
+- **get_agents**: List all 20 specialized AI agents
 - **find_agents**: Search agents by domain (e.g., "backend", "security", "AI")
 - **get_agent_info**: Get detailed agent capabilities and descriptions
-- **get_agent_prompt**: Get raw system prompt for direct use in conversations
 - **invoke_agent**: Get specialized agent context and guidance for tasks
 - **get_recommended_agents**: Get agent recommendations for specific tasks
 
@@ -116,9 +114,6 @@ find_agents("security")
 
 // Get detailed info about ai-engineer
 get_agent_info("ai-engineer")
-
-// Get raw system prompt for direct use
-get_agent_prompt("ai-engineer")
 
 // Get structured agent guidance for a task
 invoke_agent({

@@ -14,7 +14,31 @@ This MCP server brings Claude Code's powerful agent system to any MCP-compatible
 - 🎯 **Smart Recommendations**: Get suggested agents for your specific needs
 - 🔧 **MCP Protocol**: Compatible with Claude Desktop, VS Code extensions, and more
 
-## 🚀 Quick Start
+## 🚀 Quick Installation
+
+### Option 1: Install Script (Recommended)
+
+```bash
+# Download and run installer
+curl -sSL https://github.com/jenksy/jenksy-mcp/raw/main/scripts/install.sh | bash
+```
+
+The script will:
+- Download the latest JAR from GitHub releases
+- Install to `~/.jenksy-mcp/jenksy-mcp.jar`
+- Optionally configure VS Code automatically
+
+### Option 2: Manual Installation
+
+```bash
+# Download latest JAR
+curl -L https://github.com/jenksy/jenksy-mcp/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
+
+# Configure VS Code
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+```
+
+## 📦 Manual Installation
 
 ### 1. Build the Project
 
@@ -22,9 +46,77 @@ This MCP server brings Claude Code's powerful agent system to any MCP-compatible
 ./gradlew clean build
 ```
 
-### 2. Agents Included
+This creates the JAR file at `build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar`.
+
+### 2. Configure for VS Code
+
+VS Code requires global MCP server configuration. Use one of these methods:
+
+#### Option A: VS Code CLI (Recommended)
+
+Use the VS Code CLI command from step above:
+```bash
+code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
+```
+
+#### Option B: Manual Global Configuration
+
+Add to your VS Code's global MCP configuration file:
+
+1. Open VS Code Command Palette (`Cmd+Shift+P` on Mac, `Ctrl+Shift+P` on Windows/Linux)
+2. Run: `Preferences: Open User Settings (JSON)`
+3. Add the MCP server configuration:
+
+```json
+{
+  "github.copilot.chat.mcpServers": {
+    "jenksy-agents": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+      ]
+    }
+  }
+}
+```
+
+**Note:** Replace `/path/to/jenksy-mcp` with your actual project path. After adding, restart VS Code.
+
+### 3. Alternative: Configure Claude Desktop
+
+For Claude Desktop, add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "jenksy-agents": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/path/to/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
+      ]
+    }
+  }
+}
+```
+
+### 4. Verify Installation
+
+After installation, the agent tools will be available in your chosen tool. Test with:
+
+```
+# In VS Code Copilot Chat:
+@workspace Use get_agents() to see available AI agents
+
+# In Claude Desktop:
+Use get_agents() to see available AI agents
+```
+
+## 🤖 Included Agents
 
 The project includes 10 specialized agents in the `agents/` directory:
+
 - `ai-engineer` - LLM applications and RAG systems
 - `backend-architect` - API design and microservices
 - `frontend-developer` - React and modern frontend
@@ -36,51 +128,9 @@ The project includes 10 specialized agents in the `agents/` directory:
 - `database-optimizer` - Database performance tuning
 - `debugger` - Error analysis and troubleshooting
 
-### 3. Configure VS Code Copilot
-
-The project includes a pre-configured `.vscode/mcp.json` file for VS Code. To set up:
-
-1. **Install Required Extensions**:
-   - GitHub Copilot
-   - GitHub Copilot Chat
-   - Java Extension Pack (for development)
-
-2. **Open Workspace in VS Code**: Open this project folder in VS Code
-
-3. **Install Recommended Extensions**: VS Code will prompt to install recommended extensions
-
-4. **Restart VS Code**: The MCP server will be automatically detected and loaded
-
-5. **Verify Setup**: Open Copilot Chat and try:
-   ```
-   @workspace Use get_agents() to see available AI agents
-   ```
-
-### 4. Alternative: Configure Claude Desktop
-
-For Claude Desktop, add to your `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "ai-agents": {
-      "command": "java",
-      "args": [
-        "-jar",
-        "/Users/johnjenkins/java-projects/jenksy.me/jenksy-mcp/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"
-      ]
-    }
-  }
-}
-```
-
-### 5. Verify Installation
-
-The agent tools will now be available in VS Code Copilot or Claude Desktop.
-
 ## 🔧 VS Code Integration
 
-VS Code Copilot automatically detects the `mcp.json` file in your workspace and loads the MCP server.
+VS Code Copilot requires global MCP server configuration (workspace-level `.vscode/mcp.json` is not supported).
 
 **Using Agent Tools in VS Code:**
 

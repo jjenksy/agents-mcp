@@ -1,0 +1,72 @@
+# MCP Server Configuration
+server:
+  port: 8080
+
+spring:
+  application:
+    name: jenksy-mcp
+
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=30m
+
+  jpa:
+    open-in-view: false
+
+# MCP Agent Configuration
+jenksy:
+  mcp:
+    agents:
+      # Location to load agents from (classpath:agents/ for JAR, agents/ for filesystem)
+      location: agents/
+      # Whether to reload agents on file changes (development only)
+      hot-reload: false
+      # Cache TTL for agent operations
+      cache-ttl: 30m
+      # Maximum number of agent contexts to keep in memory
+      max-contexts: 1000
+      # Context cleanup interval
+      context-cleanup-interval: 5m
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,cache
+  endpoint:
+    health:
+      show-details: when-authorized
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+    git:
+      mode: full
+
+# Logging Configuration
+logging:
+  level:
+    com.jenksy.jenksymcp: INFO
+    org.springframework.cache: DEBUG
+  pattern:
+    console: "%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{ISO8601} [%thread] %-5level %logger{36} - %msg%n"
+
+# Development Profile
+---
+spring:
+  config:
+    activate:
+      on-profile: development
+
+jenksy:
+  mcp:
+    agents:
+      hot-reload: true
+
+logging:
+  level:
+    com.jenksy.jenksymcp: DEBUG

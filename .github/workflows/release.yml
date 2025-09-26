@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build with Gradle
+        run: ./gradlew clean build
+
+      - name: Get version
+        id: version
+        run: |
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            echo "version=${{ github.event.inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Rename JAR with version
+        run: |
+          mv build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar
+          cp build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar build/libs/jenksy-mcp-latest.jar
+
+      - name: Generate SHA256 checksums
+        run: |
+          cd build/libs
+          sha256sum jenksy-mcp-*.jar > checksums.txt
+          cat checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: v${{ steps.version.outputs.version }}
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', github.event.inputs.version) || github.ref }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          body: |
+            ## Installation
+
+            ### Quick Install with VS Code CLI
+            ```bash
+            # Download and install
+            curl -L https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/jenksy-mcp-${{ steps.version.outputs.version }}.jar -o ~/.jenksy-mcp.jar
+
+            # Configure VS Code
+            code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+            ```
+
+            ### Manual Download
+            Download the JAR file from the assets below and follow the [installation instructions](https://github.com/${{ github.repository }}#installation).
+
+            ### Checksums
+            Verify your download with the SHA256 checksums in `checksums.txt`.
+          files: |
+            build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar
+            build/libs/jenksy-mcp-latest.jar
+            build/libs/checksums.txt
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jenksy-mcp-${{ steps.version.outputs.version }}
+          path: |
+            build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar
+            build/libs/checksums.txt

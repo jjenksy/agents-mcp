@@ -6,19 +6,33 @@ import com.jenksy.jenksymcp.record.AgentResponse;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.tool.annotation.Tool;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.io.support.ResourcePatternResolver;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import jakarta.annotation.PreDestroy;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Service
@@ -26,39 +40,104 @@ import java.util.stream.Stream;
 public class AgentService {
 
     private final List<Agent> agents = new ArrayList<>();
-    private final Map<String, String> agentContexts = new ConcurrentHashMap<>();
+    private final Cache<String, String> agentContexts = Caffeine.newBuilder()
+            .maximumSize(1000)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .build();
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     @PostConstruct
     public void loadAgents() {
-        log.info("Loading agents from agents directory");
+        log.info("Loading agents from classpath and filesystem");
 
-        Path agentsDir = Paths.get("agents");
-        if (!Files.exists(agentsDir)) {
-            log.warn("Agents directory not found: {}", agentsDir);
-            loadDefaultAgents();
-            return;
+        // First try loading from classpath (for JAR deployments)
+        boolean loadedFromClasspath = loadAgentsFromClasspath();
+
+        if (!loadedFromClasspath) {
+            // If not found in classpath, try filesystem (for development)
+            Path agentsDir = Paths.get("agents");
+            if (!Files.exists(agentsDir)) {
+                log.warn("Agents not found in classpath or filesystem, loading default agents");
+                loadDefaultAgents();
+                return;
+            }
+
+            try (Stream<Path> paths = Files.walk(agentsDir)) {
+                paths.filter(Files::isRegularFile)
+                        .filter(path -> path.toString().endsWith(".md"))
+                        .filter(path -> !path.getFileName().toString().equals("README.md"))
+                        .forEach(this::loadAgentFromPath);
+                log.info("Loaded {} agents from filesystem: {}", agents.size(), agentsDir);
+            } catch (IOException e) {
+                log.error("Error loading agents from directory", e);
+                loadDefaultAgents();
+            }
         }
-
-        try (Stream<Path> paths = Files.walk(agentsDir)) {
-            paths.filter(Files::isRegularFile)
-                 .filter(path -> path.toString().endsWith(".md"))
-                 .filter(path -> !path.getFileName().toString().equals("README.md"))
-                 .forEach(this::loadAgent);
-        } catch (IOException e) {
-            log.error("Error loading agents from directory", e);
-            loadDefaultAgents();
-        }
-
-        log.info("Loaded {} agents", agents.size());
     }
 
-    private void loadAgent(Path agentPath) {
+    private boolean loadAgentsFromClasspath() {
+        try {
+            ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
+            Resource[] resources = resolver.getResources("classpath:agents/*.md");
+
+            if (resources.length == 0) {
+                log.debug("No agents found in classpath");
+                return false;
+            }
+
+            for (Resource resource : resources) {
+                String filename = resource.getFilename();
+                if (filename != null && !filename.equals("README.md")) {
+                    loadAgentFromResource(resource, filename.replace(".md", ""));
+                }
+            }
+
+            log.info("Loaded {} agents from classpath", agents.size());
+            return !agents.isEmpty();
+
+        } catch (IOException e) {
+            log.debug("Could not load agents from classpath: {}", e.getMessage());
+            return false;
+        }
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        scheduler.shutdown();
+        try {
+            if (!scheduler.awaitTermination(10, TimeUnit.SECONDS)) {
+                scheduler.shutdownNow();
+            }
+        } catch (InterruptedException e) {
+            scheduler.shutdownNow();
+            Thread.currentThread().interrupt();
+        }
+        agentContexts.invalidateAll();
+        log.info("Agent service shutdown completed");
+    }
+
+    private void loadAgentFromResource(Resource resource, String agentName) {
+        try (InputStream is = resource.getInputStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
+
+            String content = reader.lines().collect(Collectors.joining("\n"));
+            Agent agent = parseAgentMarkdown(content, agentName);
+            if (agent != null) {
+                agents.add(agent);
+                log.debug("Loaded agent from classpath: {}", agent.name());
+            }
+        } catch (IOException e) {
+            log.error("Error loading agent from resource: {}", agentName, e);
+        }
+    }
+
+    private void loadAgentFromPath(Path agentPath) {
         try {
             String content = Files.readString(agentPath);
             Agent agent = parseAgentMarkdown(content, agentPath.getFileName().toString().replace(".md", ""));
             if (agent != null) {
                 agents.add(agent);
-                log.debug("Loaded agent: {}", agent.name());
+                log.debug("Loaded agent from filesystem: {}", agent.name());
             }
         } catch (IOException e) {
             log.error("Error loading agent from {}", agentPath, e);
@@ -84,8 +163,7 @@ public class AgentService {
         String model = extractYamlValue(frontmatter, "model", "sonnet");
         String toolsStr = extractYamlValue(frontmatter, "tools", "");
 
-        List<String> tools = toolsStr.isEmpty() ?
-            List.of() : Arrays.asList(toolsStr.split(",\\s*"));
+        List<String> tools = toolsStr.isEmpty() ? List.of() : Arrays.asList(toolsStr.split(",\\s*"));
 
         return new Agent(name, description, model, tools, systemPrompt);
     }
@@ -99,90 +177,96 @@ public class AgentService {
     private void loadDefaultAgents() {
         log.info("Loading default agents");
         agents.addAll(List.of(
-            new Agent("ai-engineer",
-                "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
-                "opus", List.of(),
-                "You are an AI engineer specializing in production-grade LLM applications and intelligent agent architectures."),
-            new Agent("backend-architect",
-                "Design RESTful APIs, microservice boundaries, and database schemas",
-                "opus", List.of(),
-                "You are a backend system architect specializing in scalable API design and microservices."),
-            new Agent("frontend-developer",
-                "Build React components, implement responsive layouts, and handle client-side state management",
-                "sonnet", List.of(),
-                "You are a frontend developer specializing in React, modern JavaScript, and responsive design."),
-            new Agent("code-reviewer",
-                "Elite code review expert specializing in security, performance, and production reliability",
-                "opus", List.of(),
-                "You are a code review expert focusing on security, performance optimization, and production reliability."),
-            new Agent("debugger",
-                "Debugging specialist for errors, test failures, and unexpected behavior",
-                "sonnet", List.of(),
-                "You are a debugging specialist expert at resolving errors, test failures, and unexpected behavior.")
-        ));
+                new Agent("ai-engineer",
+                        "Build production-ready LLM applications, advanced RAG systems, and intelligent agents",
+                        "opus", List.of(),
+                        "You are an AI engineer specializing in production-grade LLM applications and intelligent agent architectures."),
+                new Agent("backend-architect",
+                        "Design RESTful APIs, microservice boundaries, and database schemas",
+                        "opus", List.of(),
+                        "You are a backend system architect specializing in scalable API design and microservices."),
+                new Agent("frontend-developer",
+                        "Build React components, implement responsive layouts, and handle client-side state management",
+                        "sonnet", List.of(),
+                        "You are a frontend developer specializing in React, modern JavaScript, and responsive design."),
+                new Agent("code-reviewer",
+                        "Elite code review expert specializing in security, performance, and production reliability",
+                        "opus", List.of(),
+                        "You are a code review expert focusing on security, performance optimization, and production reliability."),
+                new Agent("debugger",
+                        "Debugging specialist for errors, test failures, and unexpected behavior",
+                        "sonnet", List.of(),
+                        "You are a debugging specialist expert at resolving errors, test failures, and unexpected behavior.")));
     }
 
-    @Tool(
-        description = "Get all available AI agents that can be invoked for specialized tasks",
-        name = "get_agents"
-    )
+    @Tool(description = "Get all available AI agents that can be invoked for specialized tasks", name = "get_agents")
+    @Cacheable("agents")
     public List<Agent> getAgents() {
         log.info("Getting all available agents");
         return agents;
     }
 
-    @Tool(
-        description = "Find agents by capability or domain (e.g., 'backend', 'security', 'AI')",
-        name = "find_agents"
-    )
+    @Tool(description = "Find agents by capability or domain (e.g., 'backend', 'security', 'AI')", name = "find_agents")
+    @Cacheable(value = "agentSearch", key = "#query")
     public List<Agent> findAgents(String query) {
         log.info("Finding agents for query: {}", query);
         String lowerQuery = query.toLowerCase();
 
         return agents.stream()
-            .filter(agent ->
-                agent.name().toLowerCase().contains(lowerQuery) ||
-                agent.description().toLowerCase().contains(lowerQuery) ||
-                agent.systemPrompt().toLowerCase().contains(lowerQuery)
-            )
-            .toList();
+                .filter(agent -> agent.name().toLowerCase().contains(lowerQuery) ||
+                        agent.description().toLowerCase().contains(lowerQuery) ||
+                        agent.systemPrompt().toLowerCase().contains(lowerQuery))
+                .toList();
     }
 
-    @Tool(
-        description = "Get detailed information about a specific agent by name",
-        name = "get_agent_info"
-    )
+    @Tool(description = "Get detailed information about a specific agent by name", name = "get_agent_info")
+    @Cacheable(value = "agentInfo", key = "#agentName")
     public Agent getAgentInfo(String agentName) {
         log.info("Getting info for agent: {}", agentName);
         return agents.stream()
-            .filter(agent -> agent.name().equals(agentName))
-            .findFirst()
-            .orElse(null);
+                .filter(agent -> agent.name().equals(agentName))
+                .findFirst()
+                .orElse(null);
     }
 
-    @Tool(
-        description = "Get specialized agent context and guidance for a specific task. Returns the agent's system prompt, capabilities, and task-specific guidance that can be used by any AI model.",
-        name = "invoke_agent"
-    )
+    @Tool(description = "Get specialized agent context and guidance for a specific task. Returns the agent's system prompt, capabilities, and task-specific guidance that can be used by any AI model.", name = "invoke_agent")
     public AgentResponse invokeAgent(AgentInvocation invocation) {
+        // Validate invocation details
+        if (!StringUtils.hasText(invocation.agentName())) {
+            return new AgentResponse(
+                    "unknown",
+                    "unknown",
+                    "Error: Agent name cannot be blank",
+                    "error",
+                    invocation.context());
+        }
+
+        if (!StringUtils.hasText(invocation.task())) {
+            return new AgentResponse(
+                    invocation.agentName(),
+                    "unknown",
+                    "Error: Task description cannot be blank",
+                    "error",
+                    invocation.context());
+        }
+
         log.info("Invoking agent: {} with task: {}", invocation.agentName(), invocation.task());
 
         Agent agent = agents.stream()
-            .filter(a -> a.name().equals(invocation.agentName()))
-            .findFirst()
-            .orElse(null);
+                .filter(a -> a.name().equals(invocation.agentName()))
+                .findFirst()
+                .orElse(null);
 
         if (agent == null) {
             return new AgentResponse(
-                invocation.agentName(),
-                "unknown",
-                "Error: Agent '" + invocation.agentName() + "' not found. Use get_agents to see available agents.",
-                "error",
-                invocation.context()
-            );
+                    invocation.agentName(),
+                    "unknown",
+                    "Error: Agent '" + invocation.agentName() + "' not found. Use get_agents to see available agents.",
+                    "error",
+                    invocation.context());
         }
 
-        // Store context for this agent session
+        // Store context for this agent session with automatic expiration
         String contextKey = invocation.agentName() + "_" + System.currentTimeMillis();
         agentContexts.put(contextKey, invocation.context());
 
@@ -190,24 +274,21 @@ public class AgentService {
         String response = buildAgentGuidance(agent, invocation);
 
         return new AgentResponse(
-            agent.name(),
-            agent.model(),
-            response,
-            "success",
-            contextKey
-        );
+                agent.name(),
+                agent.model(),
+                response,
+                "success",
+                contextKey);
     }
 
-    @Tool(
-        description = "Get the raw system prompt for an agent to use directly in conversations",
-        name = "get_agent_prompt"
-    )
+    @Tool(description = "Get the raw system prompt for an agent to use directly in conversations", name = "get_agent_prompt")
+    @Cacheable(value = "agentPrompt", key = "#agentName")
     public String getAgentPrompt(String agentName) {
         log.info("Getting system prompt for agent: {}", agentName);
         Agent agent = agents.stream()
-            .filter(a -> a.name().equals(agentName))
-            .findFirst()
-            .orElse(null);
+                .filter(a -> a.name().equals(agentName))
+                .findFirst()
+                .orElse(null);
 
         if (agent == null) {
             return "Error: Agent '" + agentName + "' not found. Use get_agents to see available agents.";
@@ -216,10 +297,8 @@ public class AgentService {
         return agent.systemPrompt();
     }
 
-    @Tool(
-        description = "Get recommended agents for a specific task or domain",
-        name = "get_recommended_agents"
-    )
+    @Tool(description = "Get recommended agents for a specific task or domain", name = "get_recommended_agents")
+    @Cacheable(value = "agentRecommendations", key = "#task")
     public List<Agent> getRecommendedAgents(String task) {
         log.info("Getting recommended agents for task: {}", task);
         String lowerTask = task.toLowerCase();
@@ -229,37 +308,37 @@ public class AgentService {
 
         if (lowerTask.contains("api") || lowerTask.contains("backend") || lowerTask.contains("database")) {
             agents.stream()
-                .filter(agent -> agent.name().contains("backend") || agent.name().contains("architect"))
-                .findFirst()
-                .ifPresent(recommended::add);
+                    .filter(agent -> agent.name().contains("backend") || agent.name().contains("architect"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
         }
 
         if (lowerTask.contains("ui") || lowerTask.contains("frontend") || lowerTask.contains("react")) {
             agents.stream()
-                .filter(agent -> agent.name().contains("frontend"))
-                .findFirst()
-                .ifPresent(recommended::add);
+                    .filter(agent -> agent.name().contains("frontend"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
         }
 
         if (lowerTask.contains("ai") || lowerTask.contains("llm") || lowerTask.contains("rag")) {
             agents.stream()
-                .filter(agent -> agent.name().contains("ai-engineer"))
-                .findFirst()
-                .ifPresent(recommended::add);
+                    .filter(agent -> agent.name().contains("ai-engineer"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
         }
 
         if (lowerTask.contains("review") || lowerTask.contains("security") || lowerTask.contains("audit")) {
             agents.stream()
-                .filter(agent -> agent.name().contains("code-reviewer") || agent.name().contains("security"))
-                .findFirst()
-                .ifPresent(recommended::add);
+                    .filter(agent -> agent.name().contains("code-reviewer") || agent.name().contains("security"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
         }
 
         if (lowerTask.contains("bug") || lowerTask.contains("debug") || lowerTask.contains("error")) {
             agents.stream()
-                .filter(agent -> agent.name().contains("debugger"))
-                .findFirst()
-                .ifPresent(recommended::add);
+                    .filter(agent -> agent.name().contains("debugger"))
+                    .findFirst()
+                    .ifPresent(recommended::add);
         }
 
         // If no specific recommendations, return top 3 most versatile agents
@@ -268,6 +347,11 @@ public class AgentService {
         }
 
         return recommended;
+    }
+
+    public void cleanupExpiredContexts() {
+        agentContexts.cleanUp();
+        log.debug("Cleaned up expired agent contexts. Current size: {}", agentContexts.estimatedSize());
     }
 
     private String buildAgentGuidance(Agent agent, AgentInvocation invocation) {
@@ -329,9 +413,12 @@ public class AgentService {
 
         guidance.append("\n");
         guidance.append("INSTRUCTIONS FOR AI MODEL:\n");
-        guidance.append("Use this specialized context and system prompt to provide expert-level guidance on the given task. ");
-        guidance.append("Apply the domain expertise, patterns, and approaches specific to this agent's specialization. ");
-        guidance.append("Provide concrete, actionable recommendations based on the agent's comprehensive knowledge base.");
+        guidance.append(
+                "Use this specialized context and system prompt to provide expert-level guidance on the given task. ");
+        guidance.append(
+                "Apply the domain expertise, patterns, and approaches specific to this agent's specialization. ");
+        guidance.append(
+                "Provide concrete, actionable recommendations based on the agent's comprehensive knowledge base.");
 
         return guidance.toString();
     }

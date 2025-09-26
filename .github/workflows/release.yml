@@ -47,6 +47,7 @@ jobs:
         run: |
           mv build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar
           cp build/libs/jenksy-mcp-${{ steps.version.outputs.version }}.jar build/libs/jenksy-mcp-latest.jar
+          ls -la build/libs/
 
       - name: Generate SHA256 checksums
         run: |
@@ -67,11 +68,17 @@ jobs:
 
             ### Quick Install with VS Code CLI
             ```bash
-            # Download and install
-            curl -L https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/jenksy-mcp-${{ steps.version.outputs.version }}.jar -o ~/.jenksy-mcp.jar
+            # Download latest version
+            curl -L https://github.com/${{ github.repository }}/releases/latest/download/jenksy-mcp-latest.jar -o ~/.jenksy-mcp.jar
 
             # Configure VS Code
             code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","~/.jenksy-mcp.jar"]}'
+            ```
+
+            ### Download Specific Version
+            ```bash
+            # Download this version (v${{ steps.version.outputs.version }})
+            curl -L https://github.com/${{ github.repository }}/releases/download/v${{ steps.version.outputs.version }}/jenksy-mcp-${{ steps.version.outputs.version }}.jar -o ~/.jenksy-mcp.jar
             ```
 
             ### Manual Download

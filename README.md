@@ -2,6 +2,7 @@
 
 **A lightweight Model Context Protocol server for local development workflows.** Provides 20 specialized AI agents optimized for VS Code Copilot integration with a simple monitoring dashboard.
 
+[![Release](https://img.shields.io/github/v/release/jjenksy/agents-mcp)](https://github.com/jjenksy/agents-mcp/releases)
 [![Java](https://img.shields.io/badge/Java-21+-orange)](https://adoptium.net/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.5.5-green)](https://spring.io/projects/spring-boot)
 [![Spring AI](https://img.shields.io/badge/Spring%20AI-1.0.2-blue)](https://spring.io/projects/spring-ai)
@@ -10,10 +11,12 @@
 ## Quick Start
 
 **Prerequisites:**
+
 - Java 21+
 - Gradle (included via wrapper)
 
 **1. Clone and Build:**
+
 ```bash
 git clone <repository-url>
 cd jenksy-mcp
@@ -21,22 +24,26 @@ cd jenksy-mcp
 ```
 
 **2. Start the Server:**
+
 ```bash
 ./gradlew bootRun
 ```
 
 **3. Configure VS Code Copilot:**
+
 ```bash
 # Add to VS Code settings.json or use CLI
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","$(pwd)/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
 ```
 
 **4. Test Integration:**
+
 ```
 Please list all available AI agents
 ```
 
 **5. Access Development Dashboard:**
+
 ```
 http://localhost:8080/dashboard
 ```
@@ -69,6 +76,7 @@ Instead of manually crafting prompts, invoke specialized agents with domain expe
 ### Development Workflow
 
 **Daily Development Cycle:**
+
 ```bash
 # 1. Start server
 ./gradlew bootRun
@@ -87,11 +95,13 @@ open http://localhost:8080/dashboard
 ### Basic Monitoring
 
 **Health Check:**
+
 ```bash
 curl http://localhost:8080/actuator/health
 ```
 
 **System Metrics:**
+
 ```bash
 curl http://localhost:8080/actuator/metrics
 ```
@@ -100,6 +110,7 @@ curl http://localhost:8080/actuator/metrics
 
 **Custom Configuration:**
 Create `application-local.yml`:
+
 ```yaml
 spring:
   profiles:
@@ -107,7 +118,7 @@ spring:
 
 logging:
   level:
-    com.jenksy.jenksymcp: DEBUG     # Detailed logging
+    com.jenksy.jenksymcp: DEBUG # Detailed logging
 ```
 
 ## VS Code Integration
@@ -117,6 +128,7 @@ logging:
 ### VS Code Configuration
 
 **Option 1: Use Project Path**
+
 ```bash
 cd /path/to/jenksy-mcp
 code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","$(pwd)/build/libs/jenksy-mcp-0.0.1-SNAPSHOT.jar"]}'
@@ -124,6 +136,7 @@ code --add-mcp '{"name":"jenksy-agents","command":"java","args":["-jar","$(pwd)/
 
 **Option 2: Manual Configuration**
 Add to VS Code `settings.json`:
+
 ```json
 {
   "github.copilot.chat.mcpServers": {
@@ -141,6 +154,7 @@ Add to VS Code `settings.json`:
 ### Verification
 
 **Check MCP Connection:**
+
 ```bash
 # Ensure server is running
 curl http://localhost:8080/actuator/health
@@ -232,6 +246,7 @@ Add to your `claude_desktop_config.json`:
 ```
 
 **What happens behind the scenes:**
+
 1. VS Code Copilot understands your request
 2. It automatically calls the appropriate MCP tool (`invoke_agent`)
 3. The agent's specialized guidance is used to formulate the response
@@ -264,6 +279,7 @@ VS Code Copilot will automatically use the `get_recommended_agents` tool to sugg
 ### Browsing Available Agents
 
 **List all agents:**
+
 ```
 "Show me all available AI agents"
 "What agents do you have?"
@@ -271,6 +287,7 @@ VS Code Copilot will automatically use the `get_recommended_agents` tool to sugg
 ```
 
 **Search by domain:**
+
 ```
 "Show me agents related to backend development"
 "What security-focused agents are available?"
@@ -278,6 +295,7 @@ VS Code Copilot will automatically use the `get_recommended_agents` tool to sugg
 ```
 
 **Get specific agent details:**
+
 ```
 "Tell me about the ai-engineer agent"
 "What can the backend-architect agent do?"
@@ -322,6 +340,7 @@ These don't provide enough context for the agents to give useful guidance.
 ### Development Commands
 
 **Standard Gradle Commands:**
+
 ```bash
 ./gradlew bootRun                       # Start the server
 ./gradlew test                          # Run all tests
@@ -330,6 +349,7 @@ These don't provide enough context for the agents to give useful guidance.
 ```
 
 **Monitoring:**
+
 ```bash
 # Check health status
 curl http://localhost:8080/actuator/health
@@ -344,6 +364,7 @@ open http://localhost:8080/dashboard
 ### Configuration
 
 **Optional JVM Settings:**
+
 ```bash
 export JAVA_OPTS="-Xms128m -Xmx512m"
 ./gradlew bootRun
@@ -352,8 +373,10 @@ export JAVA_OPTS="-Xms128m -Xmx512m"
 ### Agent Development
 
 **Adding New Agents:**
+
 1. Create new `.md` file in `src/main/resources/agents/`
 2. Follow the YAML frontmatter format:
+
 ```yaml
 ---
 name: my-new-agent
@@ -361,6 +384,7 @@ description: Agent description
 ---
 # System prompt content here
 ```
+
 3. Rebuild and restart server
 4. Test via dashboard or MCP tools
 
@@ -378,6 +402,7 @@ description: Agent description
 ### Startup Issues
 
 1. **Check Java version:**
+
    ```bash
    java -version  # Ensure Java 21+
    ```
@@ -390,6 +415,7 @@ description: Agent description
 ### Performance Issues
 
 1. **Monitor system health:**
+
    ```bash
    curl http://localhost:8080/actuator/health
    ```
@@ -402,11 +428,13 @@ description: Agent description
 ### VS Code MCP Integration Issues
 
 1. **Verify server is running:**
+
    ```bash
    curl http://localhost:8080/actuator/health
    ```
 
 2. **Check VS Code configuration:**
+
    - Ensure GitHub Copilot Chat extension is installed
    - Verify JAR path is correct and absolute
    - Restart VS Code after configuration changes
@@ -420,11 +448,13 @@ description: Agent description
 ### Agent Loading Problems
 
 1. **Check agent files:**
+
    ```bash
    ls -la src/main/resources/agents/
    ```
 
 2. **Verify agent format:**
+
    ```bash
    head -10 src/main/resources/agents/ai-engineer.md
    ```
